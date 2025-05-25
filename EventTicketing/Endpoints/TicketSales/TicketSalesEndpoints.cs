@@ -13,7 +13,7 @@ namespace EventTicketing.Endpoints.Ticket
             var group = app.MapGroup("/api/tickets").WithTags("Tickets");
 
             group.MapGet("/event/{eventId}", async (
-                Guid eventId,
+                string eventId,
                 [AsParameters] PaginationRequest request,
                 [FromServices] ITicketSalesService ticketService) =>
             {

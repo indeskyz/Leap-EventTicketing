@@ -6,7 +6,7 @@ namespace EventTicketing.Data.Repositories.Tickets
 {
     public interface ITicketSalesRepository : IBaseRepository<TicketSale>
     {
-        Task<(IEnumerable<TicketSale> tickets, int totalCount)> GetTicketsForEventAsync(Guid eventId, int pageNumber, int pageSize);
+        Task<(IEnumerable<TicketSale> tickets, int totalCount)> GetTicketsForEventAsync(string eventId, int pageNumber, int pageSize);
         Task<IEnumerable<Event>> GetTopEventsByTicketCountAsync(int count);
         Task<IEnumerable<Event>> GetTopEventsByRevenueAsync(int count);
     }

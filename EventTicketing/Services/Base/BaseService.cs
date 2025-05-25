@@ -32,7 +32,8 @@ namespace EventTicketing.Services.Base
             };
         }
 
-        public virtual async Task<TDto> GetByIdAsync(int id)
+      
+        public virtual async Task<TDto> GetByIdAsync(string id)
         {
             var entity = await _repository.GetByIdAsync(id);
             return _mapper.Map<TDto>(entity);

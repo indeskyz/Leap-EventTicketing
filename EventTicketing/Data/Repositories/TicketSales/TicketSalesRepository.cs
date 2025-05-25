@@ -3,6 +3,8 @@ using EventTicketing.Data.Entities.TicketSales;
 using EventTicketing.Data.Repositories.Base;
 using EventTicketing.Data.Repositories.Tickets;
 using NHibernate.Linq;
+using NHibernate.Transform;
+using System.Text.Json;
 using ISession = NHibernate.ISession;
 
 namespace EventTicketing.Data.Repositories.TicketSalesRepository
@@ -13,11 +15,16 @@ namespace EventTicketing.Data.Repositories.TicketSalesRepository
         {
         }
 
-        public async Task<(IEnumerable<TicketSale> tickets, int totalCount)> GetTicketsForEventAsync(Guid eventId, int pageNumber, int pageSize)
+        public async Task<(IEnumerable<TicketSale> tickets, int totalCount)> GetTicketsForEventAsync(string eventId, int pageNumber, int pageSize)
         {
+            
             var query = _session.Query<TicketSale>()
-                .Where(t => t.Event.Id == eventId)
+                .Where(t => t.EventId == eventId)
                 .OrderBy(t => t.Price);
+
+            Console.WriteLine($"QUERY :: {JsonSerializer.Serialize(query)}");
+
+
 
             var totalCount = await query.CountAsync();
             var tickets = await query

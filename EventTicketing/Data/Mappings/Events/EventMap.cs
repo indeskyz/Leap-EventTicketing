@@ -11,7 +11,7 @@ namespace EventTicketing.Data.Mappings.Events
             Id(x => x.Id)
             .GeneratedBy.Assigned()
             .Column("Id")
-            .CustomType("Guid");
+            .CustomType("String");
             Map(x => x.Name).Not.Nullable().Length(100);
             Map(x => x.StartDate).Not.Nullable();
             Map(x => x.EndDate).Not.Nullable();

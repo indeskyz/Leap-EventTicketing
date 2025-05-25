@@ -12,7 +12,7 @@ namespace EventTicketing.Data.Mappings.Tickets
             Id(x => x.Id)
                 .GeneratedBy.Assigned()
                 .Column("Id")
-                .CustomType("Guid");
+                .CustomType("String");
 
             References(x => x.Event)
                 .Column("EventId")
@@ -22,16 +22,20 @@ namespace EventTicketing.Data.Mappings.Tickets
                 .Column("EventId")
                 .Not.Insert()
                 .Not.Update()
-                .CustomType("Guid");
+                .CustomType("String");
 
             Map(x => x.UserId)
                 .Column("UserId")
                 .Not.Nullable()
-                .CustomType("Guid");
+                .CustomType("String");
 
             Map(x => x.PurchaseDate)
                 .Column("PurchaseDate")
                 .Not.Nullable();
+
+            Map(x => x.Price)
+                .Formula("PriceInCents / 100.0")
+                .ReadOnly();
 
             Map(x => x.PriceInCents)
                 .Column("PriceInCents")

@@ -4,7 +4,7 @@ namespace EventTicketing.Data.Entities.Events
 {
     public class Event
     {
-        public virtual Guid Id { get; set; }
+        public virtual string Id { get; set; }
         public virtual string Name { get; set; }
         public virtual DateTime StartDate { get; set; }
         public virtual DateTime EndDate { get; set; }

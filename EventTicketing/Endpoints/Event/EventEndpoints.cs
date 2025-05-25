@@ -35,7 +35,7 @@ namespace EventTicketing.Endpoints.Event
 
             // Get event by ID
             group.MapGet("/{id}", async (
-                int id,
+                string id,
                 [FromServices] IEventService eventService) =>
             {
                 var eventDto = await eventService.GetByIdAsync(id);

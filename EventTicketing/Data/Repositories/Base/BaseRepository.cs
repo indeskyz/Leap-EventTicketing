@@ -25,7 +25,7 @@ namespace EventTicketing.Data.Repositories.Base
             return (items, totalCount);
         }
 
-        public async Task<TEntity> GetByIdAsync(int id)
+        public async Task<TEntity> GetByIdAsync(string id)
         {
             return await _session.GetAsync<TEntity>(id);
         }

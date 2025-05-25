@@ -11,7 +11,7 @@ namespace EventTicketing.Services.Tickets
     public class TicketSalesService(ITicketSalesRepository repository, IMapper mapper)
      : BaseService<TicketSale, TicketSalesDto, ITicketSalesRepository>(repository, mapper), ITicketSalesService
     {
-        public async Task<PagedResult<TicketSalesDto>> GetTicketsForEventAsync(Guid eventId, PaginationRequest request)
+        public async Task<PagedResult<TicketSalesDto>> GetTicketsForEventAsync(string eventId, PaginationRequest request)
         {
             var (tickets, totalCount) = await _repository.GetTicketsForEventAsync(eventId, request.PageNumber, request.PageSize);
 
