@@ -1,10 +1,11 @@
 require("dotenv").config();
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
-const magicDBName = `skillsAssessmentEvents.db`;
+const { v4: uuidv4 } = require('uuid');
+
 
 // Configuration
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, `${magicDBName}`);
+const DB_PATH = process.env.DB_PATH;
 const MIGRATIONS_TABLE = "__migrations";
 
 // Database connection
@@ -20,17 +21,34 @@ const runQuery = (query, params = []) => {
   });
 };
 
-const isMigrationApplied = async (migrationName) => {
+const getQuery = (query, params = []) => {
   return new Promise((resolve, reject) => {
-    db.get(
-      `SELECT 1 FROM ${MIGRATIONS_TABLE} WHERE name = ?`,
-      [migrationName],
-      (err, row) => {
-        if (err) reject(err);
-        else resolve(!!row);
-      }
-    );
+    db.get(query, params, (err, row) => {
+      if (err) reject(err);
+      else resolve(row);
+    });
   });
+};
+
+const allQuery = (query, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.all(query, params, (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows);
+    });
+  });
+};
+
+const isMigrationApplied = async (migrationName) => {
+  try {
+    const row = await getQuery(
+      `SELECT 1 FROM ${MIGRATIONS_TABLE} WHERE name = ?`,
+      [migrationName]
+    );
+    return !!row;
+  } catch (e) {
+    return false;
+  }
 };
 
 const markMigrationApplied = async (migrationName) => {
@@ -41,111 +59,162 @@ const markMigrationApplied = async (migrationName) => {
 };
 
 const initMigrationsTable = async () => {
+  await runQuery(`
+    CREATE TABLE IF NOT EXISTS ${MIGRATIONS_TABLE} (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT UNIQUE NOT NULL,
+      applied_at TEXT NOT NULL
+    )
+  `);
+};
+
+const transformEventsTable = async () => {
+  console.log("Transforming Events table...");
+  await runQuery(`BEGIN TRANSACTION`);
+  
   try {
+    // 1. Create new Events table with correct schema
     await runQuery(`
-      CREATE TABLE IF NOT EXISTS ${MIGRATIONS_TABLE} (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT UNIQUE NOT NULL,
-        applied_at TEXT NOT NULL
+      CREATE TABLE NewEvents (
+        Id TEXT PRIMARY KEY NOT NULL,
+        Name TEXT NOT NULL,
+        StartDate TEXT NOT NULL,
+        EndDate TEXT NOT NULL,
+        Location TEXT NOT NULL,
+        Description TEXT,
+        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+        UpdatedAt TEXT DEFAULT CURRENT_TIMESTAMP
       )
     `);
+
+    // 2. Check if old table exists and has data
+    const oldTableInfo = await allQuery("PRAGMA table_info(Events)");
+    const hasOldColumns = oldTableInfo.some(col => col.name === "StartsOn");
+    const rowCount = await getQuery("SELECT COUNT(*) as count FROM Events");
+
+    if (rowCount.count > 0) {
+      console.log(`Migrating ${rowCount.count} events...`);
+      
+      // 3. Copy data with column mapping
+      const events = await allQuery("SELECT * FROM Events");
+      for (const event of events) {
+        await runQuery(`
+          INSERT INTO NewEvents 
+          (Id, Name, StartDate, EndDate, Location, Description, CreatedAt, UpdatedAt)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          event.Id || uuidv4(),
+          event.Name,
+          hasOldColumns ? event.StartsOn : event.StartDate,
+          hasOldColumns ? event.EndsOn : event.EndDate,
+          event.Location,
+          event.Description,
+          event.CreatedAt,
+          event.UpdatedAt || event.CreatedAt
+        ]);
+      }
+    }
+
+    // 4. Replace old table
+    await runQuery(`DROP TABLE Events`);
+    await runQuery(`ALTER TABLE NewEvents RENAME TO Events`);
+    
+    // 5. Create indexes
+    await runQuery(`CREATE INDEX IF NOT EXISTS idx_events_start_date ON Events(StartDate)`);
+    await runQuery(`CREATE INDEX IF NOT EXISTS idx_events_end_date ON Events(EndDate)`);
+    await runQuery(`CREATE INDEX IF NOT EXISTS idx_events_location ON Events(Location)`);
+    
+    await markMigrationApplied("transform_events");
+    await runQuery(`COMMIT`);
+    console.log("Events table transformation complete");
   } catch (err) {
-    console.error("Error initializing migrations table:", err);
-    process.exit(1);
+    await runQuery(`ROLLBACK`);
+    console.error("Events table transformation failed:", err);
+    throw err;
   }
 };
 
-// Migration functions
-const addIndexes = async () => {
-  console.log("Applying migration: add_indexes");
+const transformTicketsTable = async () => {
+  console.log("Transforming Tickets table...");
+  await runQuery(`BEGIN TRANSACTION`);
+  
+  try {
+    // 1. Create new Tickets table with correct schema
+    await runQuery(`
+      CREATE TABLE NewTickets (
+        Id TEXT PRIMARY KEY NOT NULL,
+        EventId TEXT NOT NULL,
+        Type TEXT NOT NULL,
+        Price REAL NOT NULL,
+        QuantityAvailable INTEGER NOT NULL,
+        QuantitySold INTEGER NOT NULL,
+        FOREIGN KEY(EventId) REFERENCES Events(Id)
+      )
+    `);
 
-  await runQuery(
-    "CREATE INDEX IF NOT EXISTS idx_events_starts_on ON Events(StartsOn)"
-  );
-  await runQuery(
-    "CREATE INDEX IF NOT EXISTS idx_events_location ON Events(Location)"
-  );
-  await runQuery(
-    "CREATE INDEX IF NOT EXISTS idx_ticket_sales_event_id ON TicketSales(EventId)"
-  );
-  await runQuery(
-    "CREATE INDEX IF NOT EXISTS idx_ticket_sales_user_id ON TicketSales(UserId)"
-  );
-  await runQuery(
-    "CREATE INDEX IF NOT EXISTS idx_ticket_sales_purchase_date ON TicketSales(PurchaseDate)"
-  );
+    // 2. Check if old table exists and has data
+    const rowCount = await getQuery("SELECT COUNT(*) as count FROM Tickets");
 
-  await markMigrationApplied("add_indexes");
-};
-
-const addEventsColumns = async () => {
-  console.log("Applying migration: add_events_columns");
-
-  const columns = [
-    { name: "Description", type: "TEXT" },
-    { name: "CreatedAt", type: "TEXT DEFAULT CURRENT_TIMESTAMP" },
-    { name: "UpdatedAt", type: "TEXT DEFAULT CURRENT_TIMESTAMP" },
-  ];
-
-  for (const column of columns) {
-    try {
-      await runQuery(
-        `ALTER TABLE Events ADD COLUMN ${column.name} ${column.type}`
-      );
-    } catch (e) {
-      console.log(`${column.name} column already exists`);
+    if (rowCount.count > 0) {
+      console.log(`Migrating ${rowCount.count} tickets...`);
+      
+      // 3. Copy data with proper GUIDs
+      const tickets = await allQuery("SELECT * FROM Tickets");
+      for (const ticket of tickets) {
+        await runQuery(`
+          INSERT INTO NewTickets 
+          (Id, EventId, Type, Price, QuantityAvailable, QuantitySold)
+          VALUES (?, ?, ?, ?, ?, ?)
+        `, [
+          ticket.Id || uuidv4(),
+          ticket.EventId || (await getQuery("SELECT Id FROM Events LIMIT 1")).Id,
+          ticket.Type,
+          ticket.Price,
+          ticket.QuantityAvailable,
+          ticket.QuantitySold
+        ]);
+      }
     }
+
+    // 4. Replace old table
+    await runQuery(`DROP TABLE Tickets`);
+    await runQuery(`ALTER TABLE NewTickets RENAME TO Tickets`);
+    
+    // 5. Create indexes
+    await runQuery(`CREATE INDEX IF NOT EXISTS idx_tickets_event_id ON Tickets(EventId)`);
+    
+    await markMigrationApplied("transform_tickets");
+    await runQuery(`COMMIT`);
+    console.log("Tickets table transformation complete");
+  } catch (err) {
+    await runQuery(`ROLLBACK`);
+    console.error("Tickets table transformation failed:", err);
+    throw err;
   }
-
-  await markMigrationApplied("add_events_columns");
-};
-
-const addTicketSalesColumns = async () => {
-  console.log("Applying migration: add_ticketsales_columns");
-
-  const columns = [
-    { name: "Quantity", type: "INTEGER NOT NULL DEFAULT 1" },
-    { name: "Status", type: 'TEXT NOT NULL DEFAULT "completed"' },
-    { name: "PaymentMethod", type: "TEXT" },
-    { name: "CreatedAt", type: "TEXT DEFAULT CURRENT_TIMESTAMP" },
-  ];
-
-  for (const column of columns) {
-    try {
-      await runQuery(
-        `ALTER TABLE TicketSales ADD COLUMN ${column.name} ${column.type}`
-      );
-    } catch (e) {
-      console.log(`${column.name} column already exists`);
-    }
-  }
-
-  await markMigrationApplied("add_ticketsales_columns");
 };
 
 // Main migration function
 const applyMigrations = async () => {
+  console.log("Running database migrations...");
+  
   try {
     await initMigrationsTable();
-
-    const migrations = [
-      { name: "add_indexes", action: addIndexes },
-      { name: "add_events_columns", action: addEventsColumns },
-      { name: "add_ticketsales_columns", action: addTicketSalesColumns },
-    ];
-
-    for (const migration of migrations) {
-      if (!(await isMigrationApplied(migration.name))) {
-        await migration.action();
-      }
+    
+    if (!(await isMigrationApplied("transform_events"))) {
+      await transformEventsTable();
     }
-
-    console.log("All migrations applied successfully");
+    
+    if (!(await isMigrationApplied("transform_tickets"))) {
+      await transformTicketsTable();
+    }
+    
+    console.log("All migrations completed successfully");
   } catch (err) {
     console.error("Migration failed:", err);
     process.exit(1);
   } finally {
     db.close();
+    console.log("Migration process completed.");
   }
 };
 

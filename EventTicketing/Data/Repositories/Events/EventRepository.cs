@@ -15,8 +15,8 @@ namespace EventTicketing.Data.Repositories.Events
         public async Task<(IEnumerable<Event> events, int totalCount)> GetUpcomingEventsAsync(DateTime cutoffDate, int pageNumber, int pageSize)
         {
             var query = _session.Query<Event>()
-                .Where(e => e.StartsOn >= DateTime.UtcNow && e.StartsOn <= cutoffDate)
-                .OrderBy(e => e.StartsOn);
+                .Where(e => e.StartDate >= DateTime.UtcNow && e.StartDate <= cutoffDate)
+                .OrderBy(e => e.StartDate);
 
             var totalCount = await query.CountAsync();
 

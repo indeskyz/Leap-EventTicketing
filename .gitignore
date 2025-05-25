@@ -54,3 +54,40 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+# --- Vue.js and Node.js related ---
+
+# Node modules
+node_modules/
+
+# npm logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Vue.js build output
+/dist/
+/public/dist/
+
+# Vuepress build output
+.vuepress/dist/
+
+# Vite build output
+/node_modules/.vite/
+
+# Lock files (optional, if you want to ignore)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# IDE/editor specific (optional)
+.idea/
+.vscode/
+
+# MacOS system files
+.DS_Store

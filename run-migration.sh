@@ -65,7 +65,7 @@ fi
 # Install node dependencies if needed
 if [ ! -d "node_modules" ]; then
     echo "Installing Node.js dependencies..."
-    npm install sqlite3 dotenv
+    npm install sqlite3 dotenv uuid
 fi
 
 # Get database path from user or use default
