@@ -3,6 +3,7 @@ using EventTicketing.Data.Mappings;
 using EventTicketing.Data.Mappings.Events;
 using EventTicketing.Data.Repositories.Events;
 using EventTicketing.Data.Repositories.Tickets;
+using EventTicketing.Data.Repositories.TicketSalesRepository;
 using EventTicketing.Endpoints.Event;
 using EventTicketing.Endpoints.Ticket;
 using EventTicketing.Services.Events;
@@ -13,7 +14,6 @@ using Microsoft.OpenApi.Models;
 using NHibernate;
 using NHibernate.Dialect;
 using NHibernate.Driver;
-using Microsoft.Extensions.Caching.StackExchangeRedis;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -73,9 +73,9 @@ builder.Services.AddScoped<NHibernate.ISession>(provider =>
     provider.GetRequiredService<ISessionFactory>().OpenSession());
 
 builder.Services.AddScoped<IEventRepository, EventRepository>();
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
+builder.Services.AddScoped<ITicketSalesRepository, TicketSalesRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<ITicketService, TicketService>();
+builder.Services.AddScoped<ITicketSalesService, TicketSalesService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile)); 
 

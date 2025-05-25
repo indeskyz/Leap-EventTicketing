@@ -3,7 +3,6 @@ const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 const { v4: uuidv4 } = require('uuid');
 
-
 // Configuration
 const DB_PATH = process.env.DB_PATH;
 const MIGRATIONS_TABLE = "__migrations";
@@ -73,7 +72,6 @@ const transformEventsTable = async () => {
   await runQuery(`BEGIN TRANSACTION`);
   
   try {
-    // 1. Create new Events table with correct schema
     await runQuery(`
       CREATE TABLE NewEvents (
         Id TEXT PRIMARY KEY NOT NULL,
@@ -87,7 +85,6 @@ const transformEventsTable = async () => {
       )
     `);
 
-    // 2. Check if old table exists and has data
     const oldTableInfo = await allQuery("PRAGMA table_info(Events)");
     const hasOldColumns = oldTableInfo.some(col => col.name === "StartsOn");
     const rowCount = await getQuery("SELECT COUNT(*) as count FROM Events");
@@ -95,7 +92,6 @@ const transformEventsTable = async () => {
     if (rowCount.count > 0) {
       console.log(`Migrating ${rowCount.count} events...`);
       
-      // 3. Copy data with column mapping
       const events = await allQuery("SELECT * FROM Events");
       for (const event of events) {
         await runQuery(`
@@ -115,15 +111,12 @@ const transformEventsTable = async () => {
       }
     }
 
-    // 4. Replace old table
     await runQuery(`DROP TABLE Events`);
     await runQuery(`ALTER TABLE NewEvents RENAME TO Events`);
-    
-    // 5. Create indexes
     await runQuery(`CREATE INDEX IF NOT EXISTS idx_events_start_date ON Events(StartDate)`);
     await runQuery(`CREATE INDEX IF NOT EXISTS idx_events_end_date ON Events(EndDate)`);
     await runQuery(`CREATE INDEX IF NOT EXISTS idx_events_location ON Events(Location)`);
-    
+
     await markMigrationApplied("transform_events");
     await runQuery(`COMMIT`);
     console.log("Events table transformation complete");
@@ -134,80 +127,67 @@ const transformEventsTable = async () => {
   }
 };
 
-const transformTicketsTable = async () => {
-  console.log("Transforming Tickets table...");
+const restructureTicketSalesTable = async () => {
+  console.log("Restructuring TicketSales table...");
   await runQuery(`BEGIN TRANSACTION`);
-  
+
   try {
-    // 1. Create new Tickets table with correct schema
+    // Step 1: Create new table
     await runQuery(`
-      CREATE TABLE NewTickets (
+      CREATE TABLE NewTicketSales (
         Id TEXT PRIMARY KEY NOT NULL,
         EventId TEXT NOT NULL,
-        Type TEXT NOT NULL,
-        Price REAL NOT NULL,
-        QuantityAvailable INTEGER NOT NULL,
-        QuantitySold INTEGER NOT NULL,
-        FOREIGN KEY(EventId) REFERENCES Events(Id)
+        UserId TEXT NOT NULL,
+        PurchaseDate TEXT NOT NULL,
+        PriceInCents INTEGER NOT NULL,
+        FOREIGN KEY (EventId) REFERENCES Events(Id) ON DELETE CASCADE
       )
     `);
 
-    // 2. Check if old table exists and has data
-    const rowCount = await getQuery("SELECT COUNT(*) as count FROM Tickets");
-
-    if (rowCount.count > 0) {
-      console.log(`Migrating ${rowCount.count} tickets...`);
-      
-      // 3. Copy data with proper GUIDs
-      const tickets = await allQuery("SELECT * FROM Tickets");
-      for (const ticket of tickets) {
-        await runQuery(`
-          INSERT INTO NewTickets 
-          (Id, EventId, Type, Price, QuantityAvailable, QuantitySold)
-          VALUES (?, ?, ?, ?, ?, ?)
-        `, [
-          ticket.Id || uuidv4(),
-          ticket.EventId || (await getQuery("SELECT Id FROM Events LIMIT 1")).Id,
-          ticket.Type,
-          ticket.Price,
-          ticket.QuantityAvailable,
-          ticket.QuantitySold
-        ]);
-      }
+    // Step 2: Copy existing data
+    const ticketSales = await allQuery("SELECT * FROM TicketSales");
+    for (const sale of ticketSales) {
+      await runQuery(`
+        INSERT INTO NewTicketSales (Id, EventId, UserId, PurchaseDate, PriceInCents)
+        VALUES (?, ?, ?, ?, ?)
+      `, [
+        sale.Id || uuidv4(),
+        sale.EventId,
+        sale.UserId,
+        sale.PurchaseDate,
+        sale.PriceInCents
+      ]);
     }
 
-    // 4. Replace old table
-    await runQuery(`DROP TABLE Tickets`);
-    await runQuery(`ALTER TABLE NewTickets RENAME TO Tickets`);
-    
-    // 5. Create indexes
-    await runQuery(`CREATE INDEX IF NOT EXISTS idx_tickets_event_id ON Tickets(EventId)`);
-    
-    await markMigrationApplied("transform_tickets");
+    // Step 3: Replace old table
+    await runQuery(`DROP TABLE TicketSales`);
+    await runQuery(`ALTER TABLE NewTicketSales RENAME TO TicketSales`);
+    await runQuery(`CREATE INDEX IF NOT EXISTS idx_ticket_sales_event_id ON TicketSales(EventId)`);
+
+    await markMigrationApplied("restructure_ticket_sales");
     await runQuery(`COMMIT`);
-    console.log("Tickets table transformation complete");
+    console.log("TicketSales table restructure complete");
   } catch (err) {
     await runQuery(`ROLLBACK`);
-    console.error("Tickets table transformation failed:", err);
+    console.error("TicketSales table restructure failed:", err);
     throw err;
   }
 };
 
-// Main migration function
 const applyMigrations = async () => {
   console.log("Running database migrations...");
-  
+
   try {
     await initMigrationsTable();
-    
+
     if (!(await isMigrationApplied("transform_events"))) {
       await transformEventsTable();
     }
-    
-    if (!(await isMigrationApplied("transform_tickets"))) {
-      await transformTicketsTable();
+
+    if (!(await isMigrationApplied("restructure_ticket_sales"))) {
+      await restructureTicketSalesTable();
     }
-    
+
     console.log("All migrations completed successfully");
   } catch (err) {
     console.error("Migration failed:", err);
@@ -218,5 +198,4 @@ const applyMigrations = async () => {
   }
 };
 
-// Run migrations
 applyMigrations();

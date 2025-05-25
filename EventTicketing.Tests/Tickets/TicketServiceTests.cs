@@ -14,15 +14,15 @@ namespace EventTicketing.Tests.Tickets
 {
     public class TicketServiceTests
     {
-        private readonly Mock<ITicketRepository> _mockRepository;
+        private readonly Mock<ITicketSalesRepository> _mockRepository;
         private readonly Mock<IMapper> _mockMapper;
-        private readonly ITicketService _service;
+        private readonly ITicketSalesService _service;
 
         public TicketServiceTests()
         {
-            _mockRepository = new Mock<ITicketRepository>();
+            _mockRepository = new Mock<ITicketSalesRepository>();
             _mockMapper = new Mock<IMapper>();
-            _service = new TicketService(_mockRepository.Object, _mockMapper.Object);
+            _service = new TicketSalesService(_mockRepository.Object, _mockMapper.Object);
         }
 
         [Fact]

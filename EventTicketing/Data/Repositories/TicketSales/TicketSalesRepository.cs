@@ -1,25 +1,25 @@
 ﻿using EventTicketing.Data.Entities.Events;
-using EventTicketing.Data.Entities.Tickets;
+using EventTicketing.Data.Entities.TicketSales;
 using EventTicketing.Data.Repositories.Base;
+using EventTicketing.Data.Repositories.Tickets;
 using NHibernate.Linq;
 using ISession = NHibernate.ISession;
 
-namespace EventTicketing.Data.Repositories.Tickets
+namespace EventTicketing.Data.Repositories.TicketSalesRepository
 {
-    public class TicketRepository : BaseRepository<Ticket>, ITicketRepository
+    public class TicketSalesRepository : BaseRepository<TicketSale>, ITicketSalesRepository
     {
-        public TicketRepository(ISession session) : base(session)
+        public TicketSalesRepository(ISession session) : base(session)
         {
         }
 
-        public async Task<(IEnumerable<Ticket> tickets, int totalCount)> GetTicketsForEventAsync(int eventId, int pageNumber, int pageSize)
+        public async Task<(IEnumerable<TicketSale> tickets, int totalCount)> GetTicketsForEventAsync(Guid eventId, int pageNumber, int pageSize)
         {
-            var query = _session.Query<Ticket>()
+            var query = _session.Query<TicketSale>()
                 .Where(t => t.Event.Id == eventId)
                 .OrderBy(t => t.Price);
 
             var totalCount = await query.CountAsync();
-
             var tickets = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -30,9 +30,9 @@ namespace EventTicketing.Data.Repositories.Tickets
 
         public async Task<IEnumerable<Event>> GetTopEventsByTicketCountAsync(int count)
         {
-            return await _session.Query<Ticket>()
+            return await _session.Query<TicketSale>()
                 .GroupBy(t => t.Event)
-                .OrderByDescending(g => g.Sum(t => t.QuantitySold))
+                .OrderByDescending(g => g.Count())
                 .Select(g => g.Key)
                 .Take(count)
                 .ToListAsync();
@@ -40,9 +40,9 @@ namespace EventTicketing.Data.Repositories.Tickets
 
         public async Task<IEnumerable<Event>> GetTopEventsByRevenueAsync(int count)
         {
-            return await _session.Query<Ticket>()
+            return await _session.Query<TicketSale>()
                 .GroupBy(t => t.Event)
-                .OrderByDescending(g => g.Sum(t => t.Price * t.QuantitySold))
+                .OrderByDescending(g => g.Sum(t => t.Price))
                 .Select(g => g.Key)
                 .Take(count)
                 .ToListAsync();

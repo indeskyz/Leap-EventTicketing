@@ -1,14 +1,14 @@
-﻿using EventTicketing.Data.Entities.Tickets;
+﻿using EventTicketing.Data.Entities.TicketSales;
 using EventTicketing.DTOs.Events;
 using EventTicketing.DTOs.Pagination;
-using EventTicketing.DTOs.Tickets;
+using EventTicketing.DTOs.TicketSales;
 using EventTicketing.Services.Base;
 
 namespace EventTicketing.Services.Tickets
 {
-    public interface ITicketService : IBaseService<Ticket, TicketDto>
+    public interface ITicketSalesService : IBaseService<TicketSale, TicketSalesDto>
     {
-        Task<PagedResult<TicketDto>> GetTicketsForEventAsync(int eventId, PaginationRequest request);
+        Task<PagedResult<TicketSalesDto>> GetTicketsForEventAsync(Guid eventId, PaginationRequest request);
         Task<IEnumerable<EventSalesDto>> GetTopEventsByTicketCountAsync(int count);
         Task<IEnumerable<EventSalesDto>> GetTopEventsByRevenueAsync(int count);
     }

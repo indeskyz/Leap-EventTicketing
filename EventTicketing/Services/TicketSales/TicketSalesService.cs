@@ -1,23 +1,23 @@
 ﻿using AutoMapper;
-using EventTicketing.Data.Entities.Tickets;
+using EventTicketing.Data.Entities.TicketSales;
 using EventTicketing.Data.Repositories.Tickets;
 using EventTicketing.DTOs.Events;
 using EventTicketing.DTOs.Pagination;
-using EventTicketing.DTOs.Tickets;
+using EventTicketing.DTOs.TicketSales;
 using EventTicketing.Services.Base;
 
 namespace EventTicketing.Services.Tickets
 {
-    public class TicketService(ITicketRepository repository, IMapper mapper)
-     : BaseService<Ticket, TicketDto, ITicketRepository>(repository, mapper), ITicketService
+    public class TicketSalesService(ITicketSalesRepository repository, IMapper mapper)
+     : BaseService<TicketSale, TicketSalesDto, ITicketSalesRepository>(repository, mapper), ITicketSalesService
     {
-        public async Task<PagedResult<TicketDto>> GetTicketsForEventAsync(int eventId, PaginationRequest request)
+        public async Task<PagedResult<TicketSalesDto>> GetTicketsForEventAsync(Guid eventId, PaginationRequest request)
         {
             var (tickets, totalCount) = await _repository.GetTicketsForEventAsync(eventId, request.PageNumber, request.PageSize);
 
-            return new PagedResult<TicketDto>
+            return new PagedResult<TicketSalesDto>
             {
-                Items = _mapper.Map<IEnumerable<TicketDto>>(tickets),
+                Items = _mapper.Map<IEnumerable<TicketSalesDto>>(tickets),
                 TotalCount = totalCount,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize
