@@ -67,21 +67,20 @@ builder.Services.AddSingleton<ISessionFactory>(provider =>
             .AddFromAssembly(typeof(EventMap).Assembly))
         .BuildSessionFactory();
 });
+
+
 builder.Services.AddScoped<NHibernate.ISession>(provider =>
     provider.GetRequiredService<ISessionFactory>().OpenSession());
 
-// Register repositories and services
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<ITicketService, TicketService>();
 
-// AutoMapper
 builder.Services.AddAutoMapper(typeof(MappingProfile)); 
 
 var app = builder.Build();
 
-// Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -94,10 +93,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthorization();
 
-// Custom middleware
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
-// Map endpoints
 app.MapEventsEndpoints();
 app.MapTicketsEndpoints();
 
