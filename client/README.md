@@ -1,45 +1,95 @@
-# client
+# Event Ticketing Client
 
-This template should help get you started developing with Vue 3 in Vite.
+A frontend Vue 3 application for browsing and managing event ticket sales. Built using:
 
-## Recommended IDE Setup
+- **Vite** for lightning-fast development
+- **Vue 3 + Composition API**
+- **PrimeVue** for UI components
+- **Tailwind CSS** for utility-first styling
+- **Pinia** for state management
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+---
 
-## Type Support for `.vue` Imports in TS
+## Features
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+- Ticket lookup by Event ID
+- Paginated table with sorting
+- Responsive UI using PrimeVue
+- Tailwind CSS utility-first styling
+- Modular component structure
 
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+---
 
 ## Project Setup
 
-```sh
+### Prerequisites
+
+This project requires:
+
+- **Node.js** `v18.0.0` or later (recommended: latest LTS version)
+- **Yarn** (preferred) or **npm**
+
+#### 🔧 Recommended: Install Node via NVM
+
+To avoid issues with global Node installations and to easily switch between versions, we recommend using **Node Version Manager (NVM)**:
+
+- **macOS/Linux:**
+  - Follow the instructions on the [official NVM GitHub page](https://github.com/nvm-sh/nvm)
+  - After installing, run:
+
+    ```bash
+    nvm install --lts
+    nvm use --lts
+    ```
+
+- **Windows:**
+  - Use [`nvm-windows`](https://github.com/coreybutler/nvm-windows)
+  - After installation, open a new terminal and run:
+
+    ```bash
+    nvm install lts
+    nvm use lts
+    ```
+
+Once installed, confirm your Node version:
+
+```bash
+node -v   # Should be >= 18.0.0
+
+### Install dependencies
+
+```bash
+# Install with Yarn
+yarn install
+
+# Or with npm
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Running the App - Scripts are found in package.json under the client folder if you wish to invoke via your IDE
 
-```sh
+```
+yarn dev
+# or
 npm run dev
+
 ```
 
-### Type-Check, Compile and Minify for Production
 
-```sh
-npm run build
-```
+### Project Structure
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
+├── public/                 # Static assets
+├── src/
+│   ├── assets/            # Styles, images
+│   ├── components/        # Vue components (e.g., EventTicketLookup.vue)
+│   ├── models/            # TypeScript types
+│   ├── stores/            # Pinia stores (e.g., eventStore.ts)
+│   ├── views/             # App views/pages
+│   ├── App.vue
+│   └── main.ts
+├── tailwind.config.js     # Tailwind setup
+├── postcss.config.js      # Tailwind + PostCSS config
+└── vite.config.ts         # Vite config
 
-```sh
-npm run test:unit
-```
 
-### Lint with [ESLint](https://eslint.org/)
 
-```sh
-npm run lint
-```
