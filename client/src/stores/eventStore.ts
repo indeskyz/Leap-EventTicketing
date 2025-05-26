@@ -4,12 +4,14 @@ import {
   fetchUpcomingEvents,
   fetchTopEventsBySales,
   fetchTopEventsByRevenue,
+  fetchTicketsForEvent,
 } from '@/api/eventService';
 
 import type {
   Event,
   EventSalesSummary,
   EventsQueryParams,
+  TicketSalesDto,
   TopEventsQueryParams
 } from '@/models/apiTypes';
 
@@ -20,6 +22,14 @@ export const useEventStore = defineStore('events', () => {
   const loading = ref(false);
   const error = ref<Error | null>(null);
   const pagination = ref({
+    pageNumber: 1,
+    pageSize: 10,
+    totalCount: 0,
+  });
+  const tickets = ref<TicketSalesDto[]>([]);
+  const ticketsLoading = ref(false);
+  const ticketsError = ref<Error | null>(null);
+  const ticketsPagination = ref({
     pageNumber: 1,
     pageSize: 10,
     totalCount: 0,
@@ -35,7 +45,7 @@ export const useEventStore = defineStore('events', () => {
         pageSize: pagination.value.pageSize
       };
       const response = await fetchUpcomingEvents(params);
-      events.value = response.items;
+      events.value = response.items as unknown as Event[];
       pagination.value = {
         pageNumber: response.pageNumber,
         pageSize: response.pageSize,
@@ -83,7 +93,42 @@ export const useEventStore = defineStore('events', () => {
     pagination.value.pageNumber = 1;
   };
 
-  return {
+  const loadTicketsForEvent = async (eventId: string) => {
+    if (!eventId) return;
+
+    ticketsLoading.value = true;
+    ticketsError.value = null;
+
+    try {
+      const params: EventsQueryParams = {
+        pageNumber: ticketsPagination.value.pageNumber,
+        pageSize: ticketsPagination.value.pageSize,
+      };
+
+      const response = await fetchTicketsForEvent(eventId, params);
+      tickets.value = response.items as unknown as TicketSalesDto[];
+      ticketsPagination.value = {
+        pageNumber: response.pageNumber,
+        pageSize: response.pageSize,
+        totalCount: response.totalCount,
+      };
+    } catch (err) {
+      ticketsError.value = err as Error;
+    } finally {
+      ticketsLoading.value = false;
+    }
+  };
+
+  const setTicketsPage = (page: number) => {
+    ticketsPagination.value.pageNumber = page;
+  };
+
+  const setTicketsPageSize = (size: number) => {
+    ticketsPagination.value.pageSize = size;
+    ticketsPagination.value.pageNumber = 1;
+  };
+
+ return {
     events,
     topSales,
     topRevenue,
@@ -95,5 +140,13 @@ export const useEventStore = defineStore('events', () => {
     loadTopRevenue,
     setPage,
     setPageSize,
+
+    tickets,
+    ticketsLoading,
+    ticketsError,
+    ticketsPagination,
+    loadTicketsForEvent,
+    setTicketsPage,
+    setTicketsPageSize,
   };
 });

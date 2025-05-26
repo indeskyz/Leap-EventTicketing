@@ -21,7 +21,10 @@ import Message from 'primevue/message';
 import InputText from 'primevue/inputtext';
 import Toolbar from 'primevue/toolbar';
 import Paginator from 'primevue/paginator';
-import ToastService from 'primevue/toastservice'
+import ToastService from 'primevue/toastservice';
+import TabPanel from 'primevue/tabpanel';
+import TabView from 'primevue/tabview';
+import Panel from 'primevue/panel';
 
 const app = createApp(App);
 
@@ -44,6 +47,9 @@ app.component('Message', Message);
 app.component('InputText', InputText);
 app.component('Toolbar', Toolbar);
 app.component('Paginator', Paginator);
+app.component('TabPanel', TabPanel);
+app.component('TabView', TabView);
+app.component('Panel', Panel);
 
 
 app.mount('#app');

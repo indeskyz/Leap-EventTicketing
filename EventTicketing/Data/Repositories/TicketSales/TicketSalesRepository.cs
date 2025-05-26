@@ -37,6 +37,7 @@ namespace EventTicketing.Data.Repositories.TicketSalesRepository
                     QuantitySold = 1
                 })
                 .ToListAsync();
+            Console.WriteLine($"returned Tickets ::{tickets.ToArray()}");
 
             return (tickets, totalCount);
         }

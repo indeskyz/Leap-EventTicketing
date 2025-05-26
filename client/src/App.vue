@@ -18,12 +18,18 @@ const isActive = (name: string) => route.name === name;
 
       <template #end>
         <RouterLink to="/" class="p-button p-component p-button-text"
-          :class="isActive('events') ? 'p-button-primary' : ''" @click.native.prevent="() => { }">
+          :class="isActive('events') ? 'p-button-primary' : ''">
           Events
         </RouterLink>
+
         <RouterLink to="/sales" class="p-button p-component p-button-text ml-3"
-          :class="isActive('sales') ? 'p-button-primary' : ''" @click.native.prevent="() => { }">
+          :class="isActive('sales') ? 'p-button-primary' : ''">
           Sales Dashboard
+        </RouterLink>
+
+        <RouterLink to="/tickets" class="p-button p-component p-button-text ml-3"
+          :class="isActive('tickets') ? 'p-button-primary' : ''">
+          Ticket Lookup
         </RouterLink>
       </template>
     </Toolbar>
@@ -33,6 +39,7 @@ const isActive = (name: string) => route.name === name;
     </main>
   </div>
 </template>
+
 
 <style>
 a.p-button {

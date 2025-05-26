@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using EventTicketing.Data.Entities.TicketSales;
 using EventTicketing.Data.Repositories.Tickets;
+using EventTicketing.DTOs;
 using EventTicketing.DTOs.Events;
 using EventTicketing.DTOs.Pagination;
 using EventTicketing.DTOs.TicketSales;
@@ -24,20 +25,24 @@ namespace EventTicketing.Services.Tickets
             };
         }
 
-        public async Task<IEnumerable<EventSalesDto>> GetTopEventsByTicketCountAsync(int count = PaginationConstants.DefaultTopCount)
+        public async Task<ApiResponse<IEnumerable<EventSalesDto>>> GetTopEventsByTicketCountAsync(int count = PaginationConstants.DefaultTopCount)
         {
             count = Math.Min(count, PaginationConstants.MaxTopCount);
             var events = await _repository.GetTopEventsByTicketCountAsync(count);
-            return _mapper.Map<IEnumerable<EventSalesDto>>(events);
+            var result = _mapper.Map<IEnumerable<EventSalesDto>>(events);
+
+            return new ApiResponse<IEnumerable<EventSalesDto>>(result);
         }
 
-        public async Task<IEnumerable<EventSalesDto>> GetTopEventsByRevenueAsync(int count = PaginationConstants.DefaultTopCount)
+        public async Task<ApiResponse<IEnumerable<EventSalesDto>>> GetTopEventsByRevenueAsync(int count = PaginationConstants.DefaultTopCount)
         {
             count = Math.Min(count, PaginationConstants.MaxTopCount);
             var events = await _repository.GetTopEventsByRevenueAsync(count);
-            return _mapper.Map<IEnumerable<EventSalesDto>>(events);
+            var result = _mapper.Map<IEnumerable<EventSalesDto>>(events);
+
+            return new ApiResponse<IEnumerable<EventSalesDto>>(result);
         }
 
-        
+
     }
 }

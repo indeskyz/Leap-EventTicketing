@@ -28,7 +28,7 @@ export interface EventSalesSummary {
 }
 
 export interface EventsQueryParams {
-  days: number;
+  days?: number;
   pageNumber?: number;
   pageSize?: number;
   sortField?: 'name' | 'startDate';
@@ -37,4 +37,13 @@ export interface EventsQueryParams {
 
 export interface TopEventsQueryParams {
   count?: number;
+}
+
+export interface TicketSalesDto {
+  saleId: string;
+  eventId: string;
+  eventType: string;
+  price: number;
+  quantityAvailable: number;
+  quantitySold: number;
 }

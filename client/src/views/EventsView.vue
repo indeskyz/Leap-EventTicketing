@@ -29,8 +29,6 @@ onMounted(() => {
   if (eventStore.events.length === 0) {
     eventStore.loadUpcomingEvents(selectedDays.value);
   }
-  eventStore.loadTopSales();
-  eventStore.loadTopRevenue();
 });
 
 const handleDaysChange = (days: 30 | 60 | 180) => {
@@ -62,9 +60,9 @@ const handleRetry = () => {
 
 <template>
   <div>
-    <div class="mb-4 flex items-center gap-4">
-      <div class="text-lg font-medium">Show events for:</div>
-      <ButtonGroup>
+    <div>
+      <div class="px-2">Show events for:</div>
+      <ButtonGroup> 
         <Button
           v-for="option in daysOptions"
           :key="option.value"
@@ -76,7 +74,9 @@ const handleRetry = () => {
         />
       </ButtonGroup>
     </div>
+
     <ErrorDisplay v-if="error" :error="error" />
+    
     <EventsTable
       v-bind="tableProps"
       @page-change="handlePageChange"
@@ -85,4 +85,10 @@ const handleRetry = () => {
     />
   </div>
 </template>
+
+<style>
+ .px-2 {
+  padding: 10px 10px 10px 10px;
+ }
+</style>
 

@@ -38,13 +38,13 @@ const onPage = (e: { first: number; rows: number }) => {
 // Body templates
 function nameBodyTemplate(data: Event) {
   return (
-    <div class="flex items-center gap-2">
-      <span class="inline-flex items-center justify-center bg-blue-100 rounded-full w-6 h-6">
-        <CalendarIcon class="h-4 w-4 text-blue-600" />
+    <div>
+      <span>
+        <CalendarIcon />
       </span>
       <div>
-        <div class="font-medium text-gray-900">{data.name}</div>
-        <div class="text-sm text-gray-500 line-clamp-1">{data.description}</div>
+        <div>{data.name}</div>
+        <div>{data.description}</div>
       </div>
     </div>
   );
@@ -54,8 +54,8 @@ function startDateBodyTemplate(data: Event) {
   const date = new Date(data.startDate);
   return (
     <div>
-      <div class="text-gray-900">{date.toLocaleDateString()}</div>
-      <div class="text-xs text-gray-500">
+      <div>{date.toLocaleDateString()}</div>
+      <div>
         {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </div>
     </div>
@@ -66,8 +66,8 @@ function endDateBodyTemplate(data: Event) {
   const date = new Date(data.endDate);
   return (
     <div>
-      <div class="text-gray-900">{date.toLocaleDateString()}</div>
-      <div class="text-xs text-gray-500">
+      <div>{date.toLocaleDateString()}</div>
+      <div>
         {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
       </div>
     </div>
@@ -76,7 +76,7 @@ function endDateBodyTemplate(data: Event) {
 
 function locationBodyTemplate(data: Event) {
   return (
-    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+    <span>
       {data.location}
     </span>
   );
@@ -84,8 +84,8 @@ function locationBodyTemplate(data: Event) {
 </script>
 
 <template>
-  <div class="card border border-gray-200 p-4 rounded shadow">
-    <h2 class="text-lg font-semibold mb-4">Upcoming Events</h2>
+  <div>
+    <h2>Upcoming Events</h2>
     
     <ErrorDisplay v-if="error" :error="error" />    
 
@@ -121,7 +121,6 @@ function locationBodyTemplate(data: Event) {
       :first="(pagination.pageNumber - 1) * pagination.pageSize"
       :rowsPerPageOptions="[5, 10, 20, 50]"
       @page="onPage"
-      class="mt-4"
     />
   </div>
 </template>

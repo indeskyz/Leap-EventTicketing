@@ -1,4 +1,4 @@
-import type { EventsQueryParams, PaginatedResponse, TopEventsQueryParams, EventSalesSummary, ApiResponse } from '@/models/apiTypes';
+import type { EventsQueryParams, PaginatedResponse, TopEventsQueryParams, EventSalesSummary, ApiResponse, TicketSalesDto } from '@/models/apiTypes';
 import { serializeParams } from '@/utils/paramsSerializer';
 import type { AxiosError } from 'axios';
 import api, { handleApiError } from './api';
@@ -31,7 +31,6 @@ export const fetchTopEventsBySales = async (
   try {
     const queryString = serializeParams(params);
     const url = `/api/tickets/top/sales${queryString ? `?${queryString}` : ''}`;
-
     const response = await api.get<ApiResponse<EventSalesSummary[]>>(url);
     return response.items;
   } catch (error) {
@@ -45,9 +44,22 @@ export const fetchTopEventsByRevenue = async (
   try {
     const queryString = serializeParams(params);
     const url = `/api/tickets/top/revenue${queryString ? `?${queryString}` : ''}`;
-
     const response = await api.get<ApiResponse<EventSalesSummary[]>>(url);
     return response.items;
+  } catch (error) {
+    throw handleApiError(error as AxiosError);
+  }
+};
+
+export const fetchTicketsForEvent = async (
+  eventId: string,
+  params: EventsQueryParams
+): Promise<PaginatedResponse<TicketSalesDto>> => {
+  try {
+    const queryString = serializeParams(params);
+    const url = `/api/tickets/event/${eventId}${queryString ? `?${queryString}` : ''}`;
+    const response = await api.get<PaginatedResponse<TicketSalesDto>>(url);
+    return response;
   } catch (error) {
     throw handleApiError(error as AxiosError);
   }
