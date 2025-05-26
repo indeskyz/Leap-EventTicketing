@@ -5,8 +5,7 @@ An ASP.NET Core Web API (.NET 8) for browsing, querying, and analyzing event tic
 ---
 
 ## Project Layout - Server
-
-.
+```
 ├── DTOs/                     # Data transfer objects
 ├── Data/
 │   ├── Mappings/             # NHibernate mappings (Fluent)
@@ -20,6 +19,7 @@ An ASP.NET Core Web API (.NET 8) for browsing, querying, and analyzing event tic
 ├── Program.cs                # Application startup and DI setup
 ├── EventTicketing.csproj
 ├── DatabaseSetup.md          # Instructions to set up your SQLite database (see below)
+```
 
 ## Assumptions
 
