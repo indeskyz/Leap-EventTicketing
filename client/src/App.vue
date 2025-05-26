@@ -12,7 +12,7 @@ import { Bars3Icon } from '@heroicons/vue/24/outline';
             <div class="flex flex-shrink-0 items-center">
               <h1 class="text-xl font-bold text-gray-900">Event Management</h1>
             </div>
-            <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
+            <div class="sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
               <RouterLink
                 to="/"
                 class="inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium"
@@ -44,9 +44,3 @@ import { Bars3Icon } from '@heroicons/vue/24/outline';
     </div>
   </div>
 </template>
-
-<style>
-.router-link-active {
-  @apply border-blue-500 text-gray-900;
-}
-</style>

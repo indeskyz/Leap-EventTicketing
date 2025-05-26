@@ -32,6 +32,18 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevelopmentCors", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+
 
 // Configuration
 builder.Configuration
@@ -99,9 +111,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("DevelopmentCors");
 app.UseAuthorization();
 
+
 app.UseMiddleware<ErrorHandlingMiddleware>();
+
+app.MapMethods("/api/{**rest}", new[] { "OPTIONS" }, () => Results.Ok())
+   .RequireCors("DevelopmentCors");
 
 app.MapEventsEndpoints();
 app.MapTicketsEndpoints();

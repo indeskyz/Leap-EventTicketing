@@ -1,13 +1,26 @@
 import axios, { type AxiosError, type AxiosInstance, type AxiosRequestConfig } from 'axios';
 
-// Create Axios instance with default configuration
 const api: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
+  },
+});
+
+api.interceptors.request.use((config) => {
+  if (config.params) {
+    const searchParams = new URLSearchParams();
+    Object.entries(config.params).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        const capitalizedKey = key.charAt(0).toUpperCase() + key.slice(1);
+        searchParams.append(capitalizedKey, String(value));
+      }
+    });
+    config.params = searchParams;
   }
+  return config;
 });
 
 
@@ -29,11 +42,9 @@ api.interceptors.response.use(
  */
 export const handleApiError = (error: AxiosError): never => {
   if (error.response) {
-    // The request was made and the server responded with a status code
     const status = error.response.status;
     let message = 'Unknown error occurred';
 
-    // Try to get error message from response
     if (error.response.data && typeof error.response.data === 'object') {
       const data = error.response.data as any;
       message = data.message || data.title || JSON.stringify(data);
@@ -56,10 +67,8 @@ export const handleApiError = (error: AxiosError): never => {
         throw new Error(`HTTP Error ${status}: ${message}`);
     }
   } else if (error.request) {
-    // The request was made but no response was received
     throw new Error('Network Error: Could not connect to the server. Please check your connection.');
   } else {
-    // Something happened in setting up the request that triggered an Error
     throw new Error(`Request Error: ${error.message}`);
   }
 };

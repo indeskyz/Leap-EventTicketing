@@ -1,96 +1,106 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import { fetchEvents, fetchTopEventsBySales } from '@/api/eventService';
-import type { Event, SalesSummary, PaginatedResponse } from '@/api/eventService';
+import {
+  fetchUpcomingEvents,
+  fetchTopEventsBySales,
+  fetchTopEventsByRevenue,
+} from '@/api/eventService';
+
+import type {
+  Event,
+  EventSalesSummary,
+  PaginatedResponse,
+  EventsQueryParams,
+  TopEventsQueryParams,
+  ApiResponse
+} from '@/models/apiTypes';
 
 export const useEventStore = defineStore('events', () => {
   // State
   const events = ref<Event[]>([]);
-  const salesSummary = ref<SalesSummary[]>([]);
+  const topSales = ref<EventSalesSummary[]>([]);
+  const topRevenue = ref<EventSalesSummary[]>([]);
   const loading = ref(false);
   const error = ref<Error | null>(null);
   const pagination = ref({
-    page: 1,
+    pageNumber: 1,
     pageSize: 10,
     totalCount: 0,
   });
-  const sortField = ref<'name' | 'startDate'>('startDate');
-  const sortDirection = ref<'asc' | 'desc'>('asc');
 
   // Actions
-  const loadEvents = async () => {
+  const loadUpcomingEvents = async (days: number) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await fetchEvents(
-        pagination.value.page,
-        pagination.value.pageSize,
-        sortField.value,
-        sortDirection.value
-      );
-      events.value = response.data;
+      const params: EventsQueryParams = {
+        days,
+        pageNumber: pagination.value.pageNumber,
+        pageSize: pagination.value.pageSize
+      };
+      const response = await fetchUpcomingEvents(params);
+      events.value = response.items;
       pagination.value = {
-        page: response.page,
+        pageNumber: response.pageNumber,
         pageSize: response.pageSize,
         totalCount: response.totalCount,
       };
     } catch (err) {
-      error.value = err instanceof Error ? err : new Error(String(err));
+      error.value = err as Error;
     } finally {
       loading.value = false;
     }
   };
 
-  const loadTopSales = async () => {
+  const loadTopSales = async (count: number = 5) => {
     loading.value = true;
     error.value = null;
     try {
-      const response = await fetchTopEventsBySales(5);
-      salesSummary.value = response.data;
+      const params: TopEventsQueryParams = { count };
+      topSales.value = await fetchTopEventsBySales(params);
     } catch (err) {
-      error.value = err instanceof Error ? err : new Error(String(err));
+      error.value = err as Error;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const loadTopRevenue = async (count: number = 5) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      const params: TopEventsQueryParams = { count };
+      topRevenue.value = await fetchTopEventsByRevenue(params);
+    } catch (err) {
+      error.value = err as Error;
     } finally {
       loading.value = false;
     }
   };
 
   const setPage = (page: number) => {
-    pagination.value.page = page;
-    loadEvents();
+    pagination.value.pageNumber = page;
   };
 
   const setPageSize = (size: number) => {
     pagination.value.pageSize = size;
-    pagination.value.page = 1;
-    loadEvents();
+    pagination.value.pageNumber = 1;
   };
 
-  const setSort = (field: 'name' | 'startDate') => {
-    if (sortField.value === field) {
-      sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
-    } else {
-      sortField.value = field;
-      sortDirection.value = 'asc';
-    }
-    loadEvents();
-  };
-
-  // Return state and actions
   return {
     // State
     events,
-    salesSummary,
+    topSales,
+    topRevenue,
     loading,
     error,
     pagination,
-    sortField,
-    sortDirection,
-    
+
     // Actions
-    loadEvents,
+    loadUpcomingEvents,
     loadTopSales,
+    loadTopRevenue,
     setPage,
     setPageSize,
-    setSort,
   };
 });

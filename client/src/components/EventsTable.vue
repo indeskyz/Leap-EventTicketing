@@ -10,7 +10,7 @@ const props = defineProps<{
   loading: boolean;
   error: Error | null;
   pagination: {
-    page: number;
+    pageNumber: number;
     pageSize: number;
     totalCount: number;
   };
@@ -19,7 +19,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'page-change', page: number): void;
+  (e: 'page-change', pageNumber: number): void;
   (e: 'page-size-change', size: number): void;
   (e: 'sort', field: 'name' | 'startDate'): void;
 }>();
@@ -41,139 +41,165 @@ const handleSort = (field: 'name' | 'startDate') => {
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- Error Message -->
-    <div v-if="error" class="bg-red-50 text-red-700 p-4 rounded-lg">
-      {{ error.message }}
-    </div>
-
-    <!-- Loading State -->
-    <div v-if="loading" class="flex justify-center py-8">
-      <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-    </div>
-
-    <!-- Table -->
-    <div v-else class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-      <table class="min-w-full divide-y divide-gray-300">
-        <thead class="bg-gray-50">
-          <tr>
-            <th
-              v-for="header in headers"
-              :key="header.key"
-              scope="col"
-              class="px-6 py-3 text-left text-sm font-semibold text-gray-900"
-              :class="{ 'cursor-pointer hover:bg-gray-100': header.sortable }"
-              @click="header.sortable ? handleSort(header.key as 'name' | 'startDate') : null"
-            >
-              <div class="flex items-center">
-                {{ header.label }}
-                <span v-if="header.sortable && sortField === header.key" class="ml-1">
-                  <ChevronUpIcon
-                    v-if="sortDirection === 'asc'"
-                    class="h-4 w-4 text-gray-500"
-                  />
-                  <ChevronDownIcon
-                    v-else
-                    class="h-4 w-4 text-gray-500"
-                  />
-                </span>
-              </div>
-            </th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200 bg-white">
-          <tr v-for="event in events" :key="event.id" class="hover:bg-gray-50">
-            <td class="whitespace-nowrap px-6 py-4">
-              <div class="font-medium text-gray-900">{{ event.name }}</div>
-              <div class="text-gray-500 line-clamp-2">{{ event.description }}</div>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-gray-500">
-              {{ new Date(event.startDate).toLocaleDateString() }}
-              <div class="text-sm text-gray-400">
-                {{ new Date(event.startDate).toLocaleTimeString() }}
-              </div>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-gray-500">
-              {{ new Date(event.endDate).toLocaleDateString() }}
-              <div class="text-sm text-gray-400">
-                {{ new Date(event.endDate).toLocaleTimeString() }}
-              </div>
-            </td>
-            <td class="whitespace-nowrap px-6 py-4 text-gray-500">
-              {{ event.location }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="flex items-center justify-between border-t border-gray-200 px-4 py-3 sm:px-6">
-      <div class="flex flex-1 justify-between sm:hidden">
-        <button
-          :disabled="pagination.page <= 1"
-          @click="emit('page-change', pagination.page - 1)"
-          class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-        >
-          Previous
-        </button>
-        <button
-          :disabled="pagination.page >= totalPages"
-          @click="emit('page-change', pagination.page + 1)"
-          class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-        >
-          Next
-        </button>
+  <div class="space-y-6">
+    <!-- Status Indicators -->
+    <div v-if="error" class="rounded-lg bg-danger-50 p-4 shadow-sm">
+      <div class="flex items-center">
+        <XCircleIcon class="h-5 w-5 text-danger-500 mr-2" />
+        <p class="text-danger-700">{{ error.message }}</p>
       </div>
-      <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-        <div>
-          <p class="text-sm text-gray-700">
-            Showing <span class="font-medium">{{ (pagination.page - 1) * pagination.pageSize + 1 }}</span> to
-            <span class="font-medium">{{ Math.min(pagination.page * pagination.pageSize, pagination.totalCount) }}</span> of
-            <span class="font-medium">{{ pagination.totalCount }}</span> results
-          </p>
-        </div>
-        <div class="flex items-center space-x-2">
-          <select
-            v-model="pagination.pageSize"
-            @change="emit('page-size-change', Number($event.target.value))"
-            class="rounded-md border-gray-300 py-1 pl-2 pr-8 text-sm focus:border-blue-500 focus:outline-none focus:ring-blue-500"
+    </div>
+
+    <div v-if="loading" class="flex flex-col items-center justify-center py-12">
+      <LoadingSpinner class="h-12 w-12 text-primary-500" />
+      <p class="mt-3 text-lg font-medium text-secondary-500">Loading events...</p>
+    </div>
+
+    <!-- Table Container -->
+    <div v-else class="rounded-xl border border-gray-200 bg-white shadow-sm">
+      <!-- Table -->
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th
+                v-for="header in headers"
+                :key="header.key"
+                scope="col"
+                class="px-6 py-3 text-left text-sm font-semibold text-secondary-600 uppercase tracking-wider"
+                :class="{ 'cursor-pointer hover:bg-gray-100': header.sortable }"
+                @click="header.sortable ? handleSort(header.key as 'name' | 'startDate') : null"
+              >
+                <div class="flex items-center">
+                  {{ header.label }}
+                  <span v-if="header.sortable && sortField === header.key" class="ml-2">
+                    <ChevronUpIcon
+                      v-if="sortDirection === 'asc'"
+                      class="h-4 w-4 text-primary-500"
+                    />
+                    <ChevronDownIcon
+                      v-else
+                      class="h-4 w-4 text-primary-500"
+                    />
+                  </span>
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white">
+            <tr 
+              v-for="event in events" 
+              :key="event.id" 
+              class="hover:bg-gray-50 transition-colors duration-150"
+            >
+              <td class="whitespace-nowrap px-6 py-4">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 rounded-full bg-primary-100 flex items-center justify-center mr-4">
+                    <CalendarIcon class="h-5 w-5 text-primary-600" />
+                  </div>
+                  <div>
+                    <p class="text-sm font-medium text-gray-900">{{ event.name }}</p>
+                    <p class="text-sm text-gray-500 line-clamp-1">{{ event.description }}</p>
+                  </div>
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <div class="text-sm text-gray-900">
+                  {{ new Date(event.startDate).toLocaleDateString() }}
+                </div>
+                <div class="text-xs text-gray-400">
+                  {{ new Date(event.startDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <div class="text-sm text-gray-900">
+                  {{ new Date(event.endDate).toLocaleDateString() }}
+                </div>
+                <div class="text-xs text-gray-400">
+                  {{ new Date(event.endDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+                </div>
+              </td>
+              <td class="whitespace-nowrap px-6 py-4">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
+                  {{ event.location }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="bg-gray-50 px-6 py-3 flex items-center justify-between border-t border-gray-200 rounded-b-xl">
+        <div class="flex-1 flex justify-between sm:hidden">
+          <button
+            :disabled="pagination.pageNumber <= 1"
+            @click="emit('page-change', pagination.pageNumber - 1)"
+            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
           >
-            <option value="5">5 per page</option>
-            <option value="10">10 per page</option>
-            <option value="20">20 per page</option>
-            <option value="50">50 per page</option>
-          </select>
-          <nav class="flex gap-1" aria-label="Pagination">
-            <button
-              :disabled="pagination.page <= 1"
-              @click="emit('page-change', pagination.page - 1)"
-              class="relative inline-flex items-center rounded-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <span class="sr-only">Previous</span>
-              <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
-            </button>
-            <button
-              v-for="page in Math.min(5, totalPages)"
-              :key="page"
-              @click="emit('page-change', page)"
-              :class="{
-                'relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20': true,
-                'bg-blue-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600': pagination.page === page,
-                'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50': pagination.page !== page,
-              }"
-            >
-              {{ page }}
-            </button>
-            <button
-              :disabled="pagination.page >= totalPages"
-              @click="emit('page-change', pagination.page + 1)"
-              class="relative inline-flex items-center rounded-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50"
-            >
-              <span class="sr-only">Next</span>
-              <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
-            </button>
-          </nav>
+            Previous
+          </button>
+          <button
+            :disabled="pagination.pageNumber >= totalPages"
+            @click="emit('page-change', pagination.pageNumber + 1)"
+            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+          >
+            Next
+          </button>
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-sm text-gray-700">
+              Showing <span class="font-medium">{{ (pagination.pageNumber - 1) * pagination.pageSize + 1 }}</span> to
+              <span class="font-medium">{{ Math.min(pagination.pageNumber * pagination.pageSize, pagination.totalCount) }}</span> of
+              <span class="font-medium">{{ pagination.totalCount }}</span> results
+            </p>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="flex items-center">
+              <label for="page-size" class="mr-2 text-sm text-gray-700">Rows:</label>
+              <select
+                id="page-size"
+                v-model="pagination.pageSize"
+                @change="emit('page-size-change', Number($event.target.value))"
+                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 text-sm"
+              >
+                <option v-for="size in [5, 10, 20, 50]" :key="size" :value="size">
+                  {{ size }}
+                </option>
+              </select>
+            </div>
+            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+              <button
+                :disabled="pagination.pageNumber <= 1"
+                @click="emit('page-change', pagination.pageNumber - 1)"
+                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              >
+                <span class="sr-only">Previous</span>
+                <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
+              </button>
+              <button
+                v-for="page in Math.min(5, totalPages)"
+                :key="page"
+                @click="emit('page-change', page)"
+                :class="{
+                  'z-10 bg-primary-50 border-primary-500 text-primary-600': pagination.pageNumber === page,
+                  'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': pagination.pageNumber !== page,
+                  'relative inline-flex items-center px-4 py-2 border text-sm font-medium': true
+                }"
+              >
+                {{ page }}
+              </button>
+              <button
+                :disabled="pagination.pageNumber >= totalPages"
+                @click="emit('page-change', pagination.pageNumber + 1)"
+                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+              >
+                <span class="sr-only">Next</span>
+                <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
+              </button>
+            </nav>
+          </div>
         </div>
       </div>
     </div>

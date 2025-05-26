@@ -37,5 +37,7 @@ namespace EventTicketing.Services.Tickets
             var events = await _repository.GetTopEventsByRevenueAsync(count);
             return _mapper.Map<IEnumerable<EventSalesDto>>(events);
         }
+
+        
     }
 }

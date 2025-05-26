@@ -1,6 +1,7 @@
 ﻿using EventTicketing.DTOs.Events;
 using EventTicketing.DTOs.Pagination;
 using EventTicketing.DTOs.TicketSales;
+using EventTicketing.Services.Events;
 using EventTicketing.Services.Tickets;
 using Microsoft.AspNetCore.Mvc;
 
@@ -39,6 +40,8 @@ namespace EventTicketing.Endpoints.Ticket
             })
             .Produces<IEnumerable<EventSalesDto>>()
             .WithName("GetTopEventsByRevenue");
+
+            
         }
     }
 }

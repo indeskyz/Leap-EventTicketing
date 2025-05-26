@@ -60,5 +60,6 @@ namespace EventTicketing.Data.Repositories.TicketSalesRepository
                 .Take(count)
                 .ToListAsync();
         }
+
     }
 }
