@@ -11,6 +11,8 @@ An ASP.NET Core Web API (.NET 8) for browsing, querying, and analyzing event tic
 - NHibernate is the chosen ORM for flexibility with advanced queries and mapping.
 - Redis is configured but not yet implemented (caching layer planned).
 - All services should be extensible with interfaces and base classes to support future growth.
+- Monetary Versions can be handled via the backend using simple conversion mappings to keep legacy columns in tact
+- Client Side will handle the restriction of `n` days to query by for Events (30, 90, 180, etc). This logic stays on the frontend as the server only cares about being able to paginate the request.
 
 ---
 
