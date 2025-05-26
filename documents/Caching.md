@@ -106,16 +106,7 @@ graph LR
 
 3. **Inventory Management**:
    - Redis Sorted Sets for ticket tiers/pricing
-   - Redis Transactions (MULTI/EXEC) for atomic operations:
-   ```lua
-   -- Lua script for atomic reservation
-   local current = redis.call('GET', KEYS[1])
-   if tonumber(current) >= tonumber(ARGV[1]) then
-       redis.call('DECRBY', KEYS[1], ARGV[1])
-       return 1
-   end
-   return 0
-   ```
+   - Redis Transactions (MULTI/EXEC) for atomic operations
 
 ## Transaction Flow with Outbox Pattern
 
@@ -175,7 +166,7 @@ sequenceDiagram
    ```
 
 3. **Payment Handling**:
-   - Saga pattern for long-running transactions
+   - Asynchronous Gateway Aggregator Pattern for Long Running Transactions - allows us to undo operations if need be.
    - Compensating actions for failures:
    ```csharp
    public async Task Handle(PaymentFailed message)
@@ -206,4 +197,4 @@ sequenceDiagram
 - Pre-warm caches before major onsales
 - Implement virtual waiting rooms for high-demand events
 - Use Azure CDN for static assets
-- Circuit breakers on payment processor integration
+- [Circuit breakers on payment processor integration](https://github.com/App-vNext/Polly)

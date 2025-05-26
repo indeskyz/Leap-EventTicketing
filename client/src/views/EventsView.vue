@@ -2,7 +2,6 @@
 import { onMounted, computed, ref, watch } from 'vue';
 import EventsTable from '@/components/EventsTable.vue';
 import ErrorDisplay from '@/components/ui/ErrorDisplay.vue';
-import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
 import { useEventStore } from '@/stores/eventStore';
 import Button from 'primevue/button';
 import ButtonGroup from 'primevue/buttongroup';
@@ -49,13 +48,9 @@ const handlePageSizeChange = (size: number) => {
 };
 
 const handleSort = (field: 'name' | 'startDate', order: 1 | -1) => {
-  eventStore.setSort(field, order === 1 ? 'asc' : 'desc');
   eventStore.loadUpcomingEvents(selectedDays.value);
 };
 
-const handleRetry = () => {
-  eventStore.loadUpcomingEvents(selectedDays.value);
-};
 </script>
 
 <template>
@@ -75,7 +70,7 @@ const handleRetry = () => {
       </ButtonGroup>
     </div>
 
-    <ErrorDisplay v-if="error" :error="error" />
+    <ErrorDisplay v-if="tableProps.error" :error="tableProps.error" />
     
     <EventsTable
       v-bind="tableProps"

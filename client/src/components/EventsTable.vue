@@ -1,7 +1,8 @@
 <script setup lang="tsx">
 import { CalendarIcon } from '@heroicons/vue/20/solid';
-import type { Event } from '@/api/eventService';
+import type { Event } from '@/models/apiTypes';
 import ErrorDisplay from '@/components/ui/ErrorDisplay.vue'
+import type { DataTableSortEvent } from 'primevue/datatable';
 
 
 const props = defineProps<{
@@ -23,9 +24,12 @@ const emit = defineEmits<{
   (e: 'sort', field: 'name' | 'startDate', order: 1 | -1): void;
 }>();
 
-const onSort = (e: { sortField: string | null; sortOrder: 1 | -1 }) => {
-  if (e.sortField === 'name' || e.sortField === 'startDate') {
-    emit('sort', e.sortField, e.sortOrder);
+const onSort = (event: DataTableSortEvent) => {
+  const field = event.sortField;
+  const order = event.sortOrder === -1 ? -1 : 1;
+  
+  if (field === 'name' || field === 'startDate') {
+    emit('sort', field, order);
   }
 };
 
@@ -92,7 +96,7 @@ function locationBodyTemplate(data: Event) {
     <DataTable
       :value="events"
       :loading="loading"
-      :sortField="sortField"
+      :sortField="sortField || undefined"
       :sortOrder="sortDirection === 'asc' ? 1 : -1"
       @sort="onSort"
       responsiveLayout="scroll"

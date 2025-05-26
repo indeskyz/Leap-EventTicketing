@@ -1,3 +1,41 @@
+### Project Structure
+
+## Project Structure
+
+```
+.
+├── .editorconfig           # Editor configuration
+├── .env                    # Environment variables (local)
+├── .env.example           # Environment variables template
+├── .gitattributes         # Git attributes configuration
+├── .gitignore             # Git ignore rules
+├── .prettierrc.json       # Prettier formatting configuration
+├── .vscode/               # VS Code workspace settings
+├── README.md              # Project documentation
+├── env.d.ts               # Environment types for TypeScript
+├── eslint.config.ts       # ESLint configuration
+├── index.html             # Main HTML entry point
+├── node_modules/          # Dependencies (auto-generated)
+├── package-lock.json      # Dependency lock file
+├── package.json           # Project dependencies and scripts
+├── public/                # Static assets
+├── src/
+│   ├── assets/            # Styles, images
+│   ├── components/        # Vue components (e.g., EventTicketLookup.vue)
+│   ├── models/            # TypeScript types
+│   ├── stores/            # Pinia stores (e.g., eventStore.ts)
+│   ├── views/             # App views/pages
+│   ├── App.vue
+│   └── main.ts
+├── tailwind.config.js     # Tailwind CSS configuration
+├── tsconfig.app.json      # TypeScript config for app
+├── tsconfig.json          # Base TypeScript configuration
+├── tsconfig.node.json     # TypeScript config for Node.js
+├── tsconfig.vitest.json   # TypeScript config for Vitest
+├── vite.config.ts         # Vite build configuration
+└── vitest.config.ts       # Vitest testing configuration
+```
+
 # Event Ticketing Client
 
 A frontend Vue 3 application for browsing and managing event ticket sales. Built using:
@@ -74,22 +112,5 @@ yarn dev
 npm run dev
 
 ```
-
-
-### Project Structure
-
-├── public/                 # Static assets
-├── src/
-│   ├── assets/            # Styles, images
-│   ├── components/        # Vue components (e.g., EventTicketLookup.vue)
-│   ├── models/            # TypeScript types
-│   ├── stores/            # Pinia stores (e.g., eventStore.ts)
-│   ├── views/             # App views/pages
-│   ├── App.vue
-│   └── main.ts
-├── tailwind.config.js     # Tailwind setup
-├── postcss.config.js      # Tailwind + PostCSS config
-└── vite.config.ts         # Vite config
-
 
 

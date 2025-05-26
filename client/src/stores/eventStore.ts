@@ -34,6 +34,13 @@ export const useEventStore = defineStore('events', () => {
     pageSize: 10,
     totalCount: 0,
   });
+  const sortField = ref<'name' | 'startDate' | null>(null);
+  const sortDirection = ref<'asc' | 'desc' | null>(null);
+
+  const setSorting = (field: 'name' | 'startDate', direction: 'asc' | 'desc') => {
+    sortField.value = field;
+    sortDirection.value = direction;
+  };
 
   const loadUpcomingEvents = async (days: number) => {
     loading.value = true;
@@ -135,11 +142,14 @@ export const useEventStore = defineStore('events', () => {
     loading,
     error,
     pagination,
+    sortDirection,
+    sortField,
     loadUpcomingEvents,
     loadTopSales,
     loadTopRevenue,
     setPage,
     setPageSize,
+    setSorting,
 
     tickets,
     ticketsLoading,

@@ -26,8 +26,8 @@ namespace EventTicketing.Tests.Events
         {
             // Arrange
             var request = new PaginationRequest { PageNumber = 1, PageSize = 10 };
-            var testEvents = new List<Event> { new() { Id = 1, Name = "Test Event" } };
-            var testDtos = new List<EventDto> { new EventDto { Id = 1, Name = "Test Event" } };
+            var testEvents = new List<Event> { new() { Id = "411eca5c-9be4-4a84-a2be-666167e71899", Name = "Test Event" } };
+            var testDtos = new List<EventDto> { new EventDto { Id = "411eca5c-9be4-4a84-a2be-666167e71899", Name = "Test Event" } };
 
             _mockRepository
                 .Setup(r => r.GetUpcomingEventsAsync(It.IsAny<DateTime>(), request.PageNumber, request.PageSize))

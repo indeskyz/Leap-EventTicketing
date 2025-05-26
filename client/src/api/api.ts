@@ -51,7 +51,6 @@ export const handleApiError = (error: AxiosError): never => {
     } else if (typeof error.response.data === 'string') {
       message = error.response.data;
     }
-    //this would be extracted to helper file
     switch (status) {
       case 400:
         throw new Error(`Bad Request: ${message}`);

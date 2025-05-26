@@ -4,15 +4,36 @@ An ASP.NET Core Web API (.NET 8) for browsing, querying, and analyzing event tic
 
 ---
 
+## Project Layout - Server
+
+.
+├── DTOs/                     # Data transfer objects
+├── Data/
+│   ├── Mappings/             # NHibernate mappings (Fluent)
+│   ├── Repositories/         # Repository interfaces and implementations
+├── Endpoints/                # Minimal API route declarations
+├── Middleware/               # Error handling middleware
+├── Services/                 # Business logic layer
+├── Properties/
+├── appsettings.json          # Production configuration
+├── appsettings.Development.json # Development overrides
+├── Program.cs                # Application startup and DI setup
+├── EventTicketing.csproj
+├── DatabaseSetup.md          # Instructions to set up your SQLite database (see below)
+
 ## Assumptions
 
 - The schema is read-only for this application unless otherwise noted.
+
 - SQLite is used as the primary relational data store.
-- NHibernate is the chosen ORM for flexibility with advanced queries and mapping.
-- Redis is configured but not yet implemented (caching layer planned).
+
+- Redis has been configured but not yet implemented (caching layer planned). App was constructed with the thought of it being the base layer for the project inside of Caching.md
+
 - All services should be extensible with interfaces and base classes to support future growth.
-- Monetary Versions can be handled via the backend using simple conversion mappings to keep legacy columns in tact
-- Client Side will handle the restriction of `n` days to query by for Events (30, 90, 180, etc). This logic stays on the frontend as the server only cares about being able to paginate the request.
+
+- Monetary Versions can be handled via the backend using simple conversion mappings to keep legacy columns in-tact.(Would recommend transferring from SQLite to something such as PostgreSQL or even SQL Server for the benefits of having more scoped value types for our columns as SQLite only offers 5 storage classes ). In the current DB there are GUID's being stored as TEXT. Not the biggest issue but it makes mapping from application code to database values tricky sometimes + its better to have a proper matching type like how in PSQL you can use a dedicated UUID type which helps the db and app know what is being stored underneath and you _can_ sometimes get preformance benefits, in terms of storage & retrieval plus validation.
+
+- Client Side will handle the restriction of `n` days to query by for Events (30, 90, 180, etc). This logic stays on the frontend as the server only cares about being able to paginate the request. Why? The methods were built to be as generic as possible. If you want to lock down query params they can be stripped before we even make the request.
 
 ---
 
@@ -27,10 +48,32 @@ An ASP.NET Core Web API (.NET 8) for browsing, querying, and analyzing event tic
 * Redis (optional – caching not yet used)
 
 ---
+## Development Notes
+
+* Ensure Redis is running if you plan to use it (currently unused but its set it to easily use it).
+* Swagger and seeding only ran in development.
+* CORS is limited to local development hosts --> update your URLs accordingly in Program.cs .
+
+```
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("DevelopmentCors", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "https://localhost:5173", "some-new-url")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+```
+
+* The NHibernate session is scoped per request.
+* AutoMapper config validation is run at startup in development mode.
 
 ### Configuration
 
-This project uses both `appsettings.json` for production and `appsettings.Development.json`.
+This project uses both `appsettings.json` for production and `appsettings.Development.json` for local development.
 
 To configure the application:
 
@@ -50,8 +93,6 @@ To configure the application:
   }
 }
 ```
-
-> ⚠️ Development seeding should **never** be enabled in production.
 
 4. Run the application:
 
@@ -89,31 +130,19 @@ dotnet run
 * **Swagger UI** at `/swagger` (enabled in development)
 * **CORS** enabled for local development on `localhost:5173`
 * **Global error handling middleware**
-* **Redis** cache service registered (not used yet)
+* **Redis** cache service registered
 
----
-
-## Development Notes
-
-* Ensure Redis is running if you plan to use it (currently unused).
-* Swagger and seeding only run in development.
-* CORS is limited to local development hosts.
-* The NHibernate session is scoped per request.
-* AutoMapper config validation is run at startup in development mode.
 
 ---
 
 ## Unit Tests
 
-Unit tests are located in the corresponding `Tests/` folder (not shown above if not yet created). They validate:
+Unit tests are located in the corresponding `Tests/` folder They validate:
 
 * EventService behavior
 * TicketSalesService behavior
-* NHibernate integration (mocked/faked)
-* Mapping configurations
 
 ---
-
 
 ## Architecture and Code Organization
 
@@ -121,10 +150,10 @@ Unit tests are located in the corresponding `Tests/` folder (not shown above if 
 
 The application uses ASP.NET Core Minimal APIs to keep the codebase:
 
-- **Lightweight and fast to start:** Minimal APIs eliminate boilerplate controller code, reducing overhead and speeding up development.
+- **Lightweight and fast to start:** Minimal APIs eliminate boilerplate controller code, reducing overhead and speeds up development.
 - **Clear routing:** Endpoint definitions are concise and colocated, making it easy to see which routes exist.
-- **Flexible:** Minimal APIs allow easy injection of dependencies and middleware, while still supporting all features of ASP.NET Core.
-- **Modern and future-proof:** Minimal APIs are the recommended approach in .NET 8 for simple REST services, aligning with Microsoft’s vision.
+- **Flexible:** allow for easy injection of dependencies and middleware + additional routes. 
+
 
 ### Code Organization
 
@@ -162,24 +191,5 @@ To allow for future schema expansion or provider swapping (e.g., moving from SQL
 ### Performance
 
 - Queries for "Top 5 Events" are optimized for both count-based and revenue-based ranking.
-- NHibernate is configured to format and show SQL for visibility during development.
 - Pagination and date filtering ensure efficient lookups.
 
----
-
-## Project Layout
-
-.
-├── DTOs/                     # Data transfer objects
-├── Data/
-│   ├── Mappings/             # NHibernate mappings (Fluent)
-│   ├── Repositories/         # Repository interfaces and implementations
-├── Endpoints/                # Minimal API route declarations
-├── Middleware/               # Error handling middleware
-├── Services/                 # Business logic layer
-├── Properties/
-├── appsettings.json          # Production configuration
-├── appsettings.Development.json # Development overrides
-├── Program.cs                # Application startup and DI setup
-├── EventTicketing.csproj
-├── DatabaseSetup.md          # Instructions to set up your SQLite database (see below)
