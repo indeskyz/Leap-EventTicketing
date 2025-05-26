@@ -9,14 +9,11 @@ import {
 import type {
   Event,
   EventSalesSummary,
-  PaginatedResponse,
   EventsQueryParams,
-  TopEventsQueryParams,
-  ApiResponse
+  TopEventsQueryParams
 } from '@/models/apiTypes';
 
 export const useEventStore = defineStore('events', () => {
-  // State
   const events = ref<Event[]>([]);
   const topSales = ref<EventSalesSummary[]>([]);
   const topRevenue = ref<EventSalesSummary[]>([]);
@@ -28,7 +25,6 @@ export const useEventStore = defineStore('events', () => {
     totalCount: 0,
   });
 
-  // Actions
   const loadUpcomingEvents = async (days: number) => {
     loading.value = true;
     error.value = null;
@@ -88,15 +84,12 @@ export const useEventStore = defineStore('events', () => {
   };
 
   return {
-    // State
     events,
     topSales,
     topRevenue,
     loading,
     error,
     pagination,
-
-    // Actions
     loadUpcomingEvents,
     loadTopSales,
     loadTopRevenue,

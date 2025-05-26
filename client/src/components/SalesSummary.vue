@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { ChevronUpIcon, ChevronDownIcon } from '@heroicons/vue/20/solid';
+import { ref, computed, h } from 'vue';
+import  Button  from 'primevue/button';
+import  Card  from 'primevue/card';
+import DataTable from 'primevue/datatable';
+import Column  from 'primevue/column';
+import  Tooltip  from 'primevue/tooltip';
 import { XCircleIcon, TicketIcon, CurrencyDollarIcon } from '@heroicons/vue/24/outline';
 
 interface SalesSummary {
@@ -17,10 +21,8 @@ const props = defineProps<{
   error: Error | null;
 }>();
 
-// Local state for which view to show
 const activeView = ref<'sales' | 'revenue'>('sales');
 
-// Computed properties for current data
 const currentData = computed(() => {
   return activeView.value === 'sales' ? props.topSales : props.topRevenue;
 });
@@ -29,7 +31,6 @@ const currentTitle = computed(() => {
   return activeView.value === 'sales' ? 'Top 5 Events by Tickets Sold' : 'Top 5 Events by Revenue';
 });
 
-// Summary calculations
 const totalTicketsSold = computed(() => {
   return props.topSales.reduce((sum, sale) => sum + sale.ticketsSold, 0);
 });
@@ -37,161 +38,136 @@ const totalTicketsSold = computed(() => {
 const totalRevenue = computed(() => {
   return props.topRevenue.reduce((sum, sale) => sum + sale.totalRevenue, 0);
 });
+
+const dismissed = ref(false);
+const dismiss = () => {
+  dismissed.value = true;
+};
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Error Display -->
-    <div v-if="error" class="rounded-lg bg-red-50 p-4 shadow-sm">
-      <div class="flex items-center">
-        <XCircleIcon class="h-5 w-5 text-red-500 mr-2" />
-        <p class="text-red-700">{{ error.message }}</p>
+  <div v-if="!dismissed" class="space-y-6">
+    <!-- Error Alert -->
+    <Card
+      v-if="error"
+      class="p-error mb-4"
+      title="Error"
+      style="position: relative;"
+    >
+      <Button
+        icon="pi pi-times"
+        class="p-button-text p-button-sm"
+        style="position: absolute; top: 0.5rem; right: 0.5rem;"
+        @click="dismiss"
+        aria-label="Dismiss error"
+      />
+      <div class="flex items-center gap-2">
+        <XCircleIcon class="h-5 w-5 text-red-600" />
+        <span class="text-red-700">{{ error.message }}</span>
       </div>
-    </div>
+    </Card>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="flex flex-col items-center justify-center py-12">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
-      <p class="mt-3 text-lg font-medium text-gray-500">Loading sales data...</p>
-    </div>
+    <Card
+      v-if="loading"
+      class="mb-4"
+      style="position: relative;"
+    >
+      <Button
+        icon="pi pi-times"
+        class="p-button-text p-button-sm"
+        style="position: absolute; top: 0.5rem; right: 0.5rem;"
+        @click="dismiss"
+        aria-label="Dismiss loading state"
+      />
+      <div class="flex flex-col items-center justify-center py-12 gap-3">
+        <LoadingSpinner class="h-12 w-12 text-blue-500" />
+        <p class="text-lg font-medium text-gray-500">Loading sales data...</p>
+      </div>
+    </Card>
 
-    <!-- Content -->
-    <div v-else class="space-y-6">
-      <!-- Summary Cards -->
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
-            <div class="flex items-center">
-              <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                <TicketIcon class="h-6 w-6 text-white" />
-              </div>
-              <div class="ml-5 w-0 flex-1">
-                <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Total Tickets Sold (Top 5)</dt>
-                  <dd class="flex items-baseline">
-                    <div class="text-2xl font-semibold text-gray-900">
-                      {{ totalTicketsSold.toLocaleString() }}
-                    </div>
-                  </dd>
-                </dl>
-              </div>
-            </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <Card>
+        <div class="flex items-center gap-4">
+          <div class="bg-blue-500 rounded-md p-3 flex items-center justify-center">
+            <TicketIcon class="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Total Tickets Sold</h3>
+            <p class="text-2xl font-semibold text-gray-900">{{ totalTicketsSold.toLocaleString() }}</p>
           </div>
         </div>
+      </Card>
 
-        <div class="bg-white overflow-hidden shadow rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
-            <div class="flex items-center">
-              <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
-                <CurrencyDollarIcon class="h-6 w-6 text-white" />
-              </div>
-              <div class="ml-5 w-0 flex-1">
-                <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Total Revenue (Top 5)</dt>
-                  <dd class="flex items-baseline">
-                    <div class="text-2xl font-semibold text-gray-900">
-                      {{ totalRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-                    </div>
-                  </dd>
-                </dl>
-              </div>
-            </div>
+      <Card>
+        <div class="flex items-center gap-4">
+          <div class="bg-green-500 rounded-md p-3 flex items-center justify-center">
+            <CurrencyDollarIcon class="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h3 class="text-sm font-medium text-gray-500">Total Revenue</h3>
+            <p class="text-2xl font-semibold text-gray-900">
+              {{ totalRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
+            </p>
           </div>
         </div>
-      </div>
-
-      <!-- View Toggle -->
-      <div class="flex items-center justify-center">
-        <div class="flex rounded-lg border border-gray-200 bg-gray-50 p-1">
-          <button
-            @click="activeView = 'sales'"
-            :class="{
-              'bg-white shadow-sm text-blue-600 border-blue-200': activeView === 'sales',
-              'text-gray-600 hover:text-gray-800 hover:bg-gray-100': activeView !== 'sales'
-            }"
-            class="px-4 py-2 text-sm font-medium rounded-md border transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-          >
-            Top by Sales
-          </button>
-          <button
-            @click="activeView = 'revenue'"
-            :class="{
-              'bg-white shadow-sm text-blue-600 border-blue-200': activeView === 'revenue',
-              'text-gray-600 hover:text-gray-800 hover:bg-gray-100': activeView !== 'revenue'
-            }"
-            class="px-4 py-2 text-sm font-medium rounded-md border transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-          >
-            Top by Revenue
-          </button>
-        </div>
-      </div>
-
-      <!-- Table -->
-      <div class="bg-white shadow rounded-lg overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-          <h3 class="text-lg font-medium text-gray-900">{{ currentTitle }}</h3>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rank
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Event Name
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tickets Sold
-                </th>
-                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Revenue
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <tr 
-                v-for="(sale, index) in currentData" 
-                :key="sale.eventId" 
-                class="hover:bg-gray-50 transition-colors duration-150"
-                :class="{ 'bg-yellow-50': index === 0 }"
-              >
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <span 
-                      class="inline-flex items-center justify-center h-8 w-8 rounded-full text-sm font-medium"
-                      :class="{
-                        'bg-yellow-500 text-white': index === 0,
-                        'bg-gray-200 text-gray-700': index === 1,
-                        'bg-orange-200 text-orange-800': index === 2,
-                        'bg-blue-100 text-blue-800': index > 2
-                      }"
-                    >
-                      {{ index + 1 }}
-                    </span>
-                  </div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ sale.eventName }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ sale.ticketsSold.toLocaleString() }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-semibold text-green-600">
-                    {{ sale.totalRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' }) }}
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-if="currentData.length === 0" class="text-center py-12">
-        <p class="text-gray-500">No sales data available</p>
-      </div>
+      </Card>
     </div>
+
+    <div class="flex justify-center mt-4">
+      <Button
+        label="By Sales"
+        :class="{'p-button-primary': activeView === 'sales'}"
+        class="mr-2"
+        @click="activeView = 'sales'"
+      />
+      <Button
+        label="By Revenue"
+        :class="{'p-button-primary': activeView === 'revenue'}"
+        @click="activeView = 'revenue'"
+      />
+    </div>
+
+    <Card class="mt-6" style="position: relative;">
+      <Button
+        icon="pi pi-times"
+        class="p-button-text p-button-sm"
+        style="position: absolute; top: 0.5rem; right: 0.5rem;"
+        @click="dismiss"
+        aria-label="Dismiss summary"
+      />
+      <h3 class="text-lg font-medium mb-4">{{ currentTitle }}</h3>
+
+      <DataTable
+        :value="currentData"
+        responsiveLayout="scroll"
+        stripedRows
+        size="small"
+      >
+        <Column
+          field=""
+          header="Rank"
+          :body="(data, { rowIndex }) => {
+            const colors = ['bg-yellow-100 text-yellow-800', 'bg-gray-100 text-gray-800', 'bg-orange-100 text-orange-800', 'bg-blue-50 text-blue-800'];
+            const colorClass = rowIndex < colors.length ? colors[rowIndex] : colors[colors.length - 1];
+            return h('span', { class: ['inline-flex items-center justify-center h-8 w-8 rounded-full text-sm font-medium', colorClass] }, rowIndex + 1);
+          }"
+          style="width: 4rem"
+        />
+        <Column field="eventName" header="Event Name" />
+        <Column
+          field="ticketsSold"
+          header="Tickets Sold"
+          :body="(data) => data.ticketsSold.toLocaleString()"
+          style="text-align:right;"
+        />
+        <Column
+          field="totalRevenue"
+          header="Revenue"
+          :body="(data) =>
+            data.totalRevenue.toLocaleString('en-US', { style: 'currency', currency: 'USD' })"
+          style="text-align:right;"
+        />
+      </DataTable>
+    </Card>
   </div>
 </template>

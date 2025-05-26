@@ -1,4 +1,3 @@
-// utils/paramsSerializer.ts
 export const serializeParams = (params: Record<string, any>): string => {
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {

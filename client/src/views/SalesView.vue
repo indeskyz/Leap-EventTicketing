@@ -4,6 +4,7 @@ import SalesSummary from '@/components/SalesSummary.vue';
 import ErrorDisplay from '@/components/ui/ErrorDisplay.vue';
 import LoadingSpinner from '@/components/ui/LoadingSpinner.vue';
 import { useEventStore } from '@/stores/eventStore';
+import { Button } from 'primevue/button';
 
 const eventStore = useEventStore();
 
@@ -39,19 +40,19 @@ const handleRetry = () => {
         </div>
         <LoadingSpinner v-if="eventStore.loading" class="h-6 w-6 text-blue-500" />
       </div>
-      
+
       <ErrorDisplay
         v-if="eventStore.error"
         :error="eventStore.error"
         @retry="handleRetry"
         class="mb-6"
       />
-      
-      <div v-if="eventStore.loading && eventStore.topSales.length === 0 && eventStore.topRevenue.length === 0" class="py-12">
+
+      <div v-if="eventStore.loading && eventStore.topSales.length === 0 && eventStore.topRevenue.length === 0" class="py-12 text-center">
         <LoadingSpinner class="mx-auto h-12 w-12 text-blue-500" />
-        <p class="mt-4 text-center text-gray-500">Loading sales data...</p>
+        <p class="mt-4 text-gray-500">Loading sales data...</p>
       </div>
-      
+
       <template v-else>
         <SalesSummary v-bind="summaryProps" />
       </template>

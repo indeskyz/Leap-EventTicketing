@@ -1,11 +1,9 @@
-// Basic API response structure
 export interface ApiResponse<T> {
   items: T;
   success: boolean;
   message?: string;
 }
 
-// Paginated API response
 export interface PaginatedResponse<T> {
   items: T[];
   pageNumber: number;
@@ -13,7 +11,6 @@ export interface PaginatedResponse<T> {
   totalCount: number;
 }
 
-// Event model
 export interface Event {
   id: string;
   name: string;
@@ -30,7 +27,6 @@ export interface EventSalesSummary {
   totalRevenue: number;
 }
 
-// Query parameters
 export interface EventsQueryParams {
   days: number;
   pageNumber?: number;
