@@ -55,7 +55,7 @@ graph TD
    - Azure API Management for request throttling and API versioning
 
 2. **Core Services**:
-   - **Ticket Service**: .NET 7 microservice with Dapr for state management
+   - **Ticket Service**: .NET 8 microservice with Dapr for state management
    - **Payment Service**: Isolated service with circuit breakers
    - **User Service**: Handles authentication and profiles
 
@@ -207,5 +207,3 @@ sequenceDiagram
 - Implement virtual waiting rooms for high-demand events
 - Use Azure CDN for static assets
 - Circuit breakers on payment processor integration
-
-This architecture addresses the complex transactional nature of ticketing systems while providing the scalability needed for sudden traffic spikes. The outbox pattern ensures reliable processing even during partial failures, and Redis provides the low-latency data access required for real-time inventory management.
