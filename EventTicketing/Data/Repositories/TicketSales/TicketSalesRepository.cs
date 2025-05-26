@@ -2,6 +2,7 @@
 using EventTicketing.Data.Entities.TicketSales;
 using EventTicketing.Data.Repositories.Base;
 using EventTicketing.Data.Repositories.Tickets;
+using EventTicketing.DTOs.TicketSales;
 using NHibernate.Linq;
 using NHibernate.Transform;
 using System.Text.Json;
@@ -15,21 +16,26 @@ namespace EventTicketing.Data.Repositories.TicketSalesRepository
         {
         }
 
-        public async Task<(IEnumerable<TicketSale> tickets, int totalCount)> GetTicketsForEventAsync(string eventId, int pageNumber, int pageSize)
+        public async Task<(IEnumerable<TicketSalesDto> tickets, int totalCount)> GetTicketsForEventAsync(string eventId, int pageNumber, int pageSize)
         {
-            
             var query = _session.Query<TicketSale>()
                 .Where(t => t.EventId == eventId)
                 .OrderBy(t => t.Price);
 
-            Console.WriteLine($"QUERY :: {JsonSerializer.Serialize(query)}");
-
-
-
             var totalCount = await query.CountAsync();
+
             var tickets = await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
+                .Select(t => new TicketSalesDto
+                {
+                    Id = t.Id,
+                    EventId = t.EventId,
+                    Price = t.Price,
+                    Type = "Standard",
+                    QuantityAvailable = 0,
+                    QuantitySold = 1
+                })
                 .ToListAsync();
 
             return (tickets, totalCount);

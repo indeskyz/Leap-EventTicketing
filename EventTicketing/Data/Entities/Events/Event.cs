@@ -1,4 +1,5 @@
 ﻿using EventTicketing.Data.Entities.TicketSales;
+using System.Text.Json.Serialization;
 
 namespace EventTicketing.Data.Entities.Events
 {
@@ -10,6 +11,7 @@ namespace EventTicketing.Data.Entities.Events
         public virtual DateTime EndDate { get; set; }
         public virtual string Description { get; set; }
         public virtual string Location { get; set; }
+        
         public virtual ICollection<TicketSale> TicketSale
         {
             get; set;

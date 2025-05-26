@@ -1,11 +1,12 @@
 ﻿using EventTicketing.Data.Entities.Events;
+using System.Text.Json.Serialization;
 
 namespace EventTicketing.Data.Entities.TicketSales
 {
     public class TicketSale
     {
         public virtual string Id { get; set; }
-
+        
         public required virtual Event Event { get; set; }
         public required virtual string EventId { get; set; }
 
