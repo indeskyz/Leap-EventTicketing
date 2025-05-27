@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EventTicketing.Cache.Services;
 using EventTicketing.Data.Entities.Events;
 using EventTicketing.Data.Repositories.Tickets;
 using EventTicketing.DTOs.Events;
@@ -16,13 +17,15 @@ namespace EventTicketing.Tests.Tickets
     {
         private readonly Mock<ITicketSalesRepository> _mockRepository;
         private readonly Mock<IMapper> _mockMapper;
+        private readonly Mock<ICacheService> _mockCacheService;
         private readonly ITicketSalesService _service;
 
         public TicketServiceTests()
         {
             _mockRepository = new Mock<ITicketSalesRepository>();
             _mockMapper = new Mock<IMapper>();
-            _service = new TicketSalesService(_mockRepository.Object, _mockMapper.Object);
+            _mockCacheService = new Mock<ICacheService>();
+            _service = new TicketSalesService(_mockRepository.Object, _mockMapper.Object, _mockCacheService.Object);
         }
 
         [Fact]

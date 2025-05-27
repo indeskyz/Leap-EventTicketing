@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using EventTicketing.Cache.Services;
 using EventTicketing.Data.Entities.TicketSales;
 using EventTicketing.Data.Repositories.Tickets;
 using EventTicketing.DTOs;
@@ -9,9 +10,11 @@ using EventTicketing.Services.Base;
 
 namespace EventTicketing.Services.Tickets
 {
-    public class TicketSalesService(ITicketSalesRepository repository, IMapper mapper)
-     : BaseService<TicketSale, TicketSalesDto, ITicketSalesRepository>(repository, mapper), ITicketSalesService
+    public class TicketSalesService(ITicketSalesRepository repository, IMapper mapper, ICacheService cache)
+     : BaseService<TicketSale, TicketSalesDto, ITicketSalesRepository>(repository, mapper, cache), ITicketSalesService
     {
+        protected override string CacheKeyPrefix => "tickets";
+
         public async Task<PagedResult<TicketSalesDto>> GetTicketsForEventAsync(string eventId, PaginationRequest request)
         {
             var (tickets, totalCount) = await _repository.GetTicketsForEventAsync(eventId, request.PageNumber, request.PageSize);

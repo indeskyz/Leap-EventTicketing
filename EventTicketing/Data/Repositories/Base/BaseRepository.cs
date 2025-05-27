@@ -29,5 +29,6 @@ namespace EventTicketing.Data.Repositories.Base
         {
             return await _session.GetAsync<TEntity>(id);
         }
+
     }
 }

@@ -44,6 +44,18 @@ namespace EventTicketing.Endpoints.Event
             .Produces<EventDto>()
             .Produces(StatusCodes.Status404NotFound)
             .WithName("GetEventById");
+
+            //Cache Route for event by ID
+            group.MapGet("/cache/{id}", async (
+               string id,
+               [FromServices] IEventService eventService) =>
+            {
+                var eventDto = await eventService.CachedGetByIdAsync(id);
+                return eventDto == null ? Results.NotFound() : Results.Ok(eventDto);
+            })
+           .Produces<EventDto>()
+           .Produces(StatusCodes.Status404NotFound)
+           .WithName("CachedGetEventById");
         }
     }
 }

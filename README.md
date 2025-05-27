@@ -18,6 +18,7 @@ Full Stack Developer Position - Leap Event Technology
 ├── appsettings.Development.json # Development overrides
 ├── Program.cs                # Application startup and DI setup
 ├── EventTicketing.csproj
+├── Cache/                    # Cache Layer - PoC how an agnostic L1/L1+L2 Service could look like
 ├── DatabaseSetup.md          # Instructions to set up your SQLite database (see below)
 ```
 
@@ -27,7 +28,7 @@ Full Stack Developer Position - Leap Event Technology
 
 - SQLite is used as the primary relational data store.
 
-- Redis has been configured but not yet implemented (caching layer planned). App was constructed with the thought of it being the base layer for the project inside of Caching.md
+- Redis has been configured but not yet implemented (caching layer planned). App was constructed with the thought of it being the base layer for the project inside of Caching.md. You can test the cache endpoint that is provided, just be sure to uncomment the `Caching Layer` block inside of Program.cs!
 
 - All services should be extensible with interfaces and base classes to support future growth.
 
@@ -112,6 +113,9 @@ dotnet run
 * `GET /api/events?days=30|60|180`
   Returns upcoming events within the specified window.
 
+* `GET /api/tickets/cache/{eventId}`
+  Returns all tickets for a given event ID Using the PoC Cache - **Client is not exposed to this endpoint**
+
 ### Tickets
 
 * `GET /api/tickets/{eventId}`
@@ -145,6 +149,7 @@ They validate:
 
 * EventService behavior
 * TicketSalesService behavior
+* CacheService behavior
 
 ---
 

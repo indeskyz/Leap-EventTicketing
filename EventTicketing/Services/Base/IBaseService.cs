@@ -6,5 +6,6 @@ namespace EventTicketing.Services.Base
     {
         Task<PagedResult<TDto>> GetAllAsync(PaginationRequest request);
         Task<TDto> GetByIdAsync(string id);
+        Task<TDto> CachedGetByIdAsync(string id);
     }
 }
