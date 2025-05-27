@@ -5,6 +5,7 @@ Full Stack Developer Position - Leap Event Technology
 There are 2 branches
 
 `tanner-dev` --> does not require redis as there is no cache implementation
+
 `cache-layer` --> requires you to have a redis server
 
 The cache-layer has some extra services, tests, and an endpoint to show you how I would setup a service that can connect and query any type of caching mechanism. Whether its HybridCache, SystemCache, Cloud resource using redis, local redis, etc.
