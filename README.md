@@ -24,6 +24,7 @@ App still runs the exact same and you can query an event by Id and have its resu
 ├── Middleware/               # Error handling middleware
 ├── Services/                 # Business logic layer
 ├── Properties/
+├── Infrastructure/           # Used for Application Config and Loading in Env Vars
 ├── appsettings.json          # Production configuration
 ├── appsettings.Development.json # Development overrides
 ├── Program.cs                # Application startup and DI setup
