@@ -147,7 +147,7 @@ dotnet run
 * **Swagger UI** at `/swagger` (enabled in development)
 * **CORS** enabled for local development
 * **Global error handling middleware**
-* **Redis** cache service (unregistered but fully configured)
+* **Redis** cache service
 
 
 ---
