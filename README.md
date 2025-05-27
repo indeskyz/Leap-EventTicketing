@@ -10,7 +10,7 @@ There are 2 branches
 
 The cache-layer has some extra services, tests, and an endpoint to show you how I would setup a service that can connect and query any type of caching mechanism. Whether its HybridCache, SystemCache, Cloud resource using redis, local redis, etc.
 
-App still runs the exact same and you can query an event by Id and have its result saved in the redis cache!
+App still runs the exact same and you can query an event by Id and have its result saved in the redis cache (This endpoint is not exposed to the client its PoC!!)
 
 ---
 
@@ -38,8 +38,6 @@ App still runs the exact same and you can query an event by Id and have its resu
 
 - SQLite is used as the primary relational data store.
 
-- Redis has been configured but not yet implemented (caching layer planned). App was constructed with the thought of it being the base layer for the project inside of Caching.md. You can test the cache endpoint that is provided, just be sure to uncomment the `Caching Layer` block inside of Program.cs!
-
 - All services should be extensible with interfaces and base classes to support future growth.
 
 - Monetary conversions can be handled via the backend using simple conversion mappings to keep legacy columns in-tact.(Would recommend transferring from SQLite to something such as PostgreSQL or even SQL Server for the benefits of having more scoped value types for our columns as SQLite only offers 5 storage classes ). In the current DB there are GUID's being stored as TEXT. Not the biggest issue but it makes mapping from application code to database values tricky sometimes + its better to have a proper matching type like how in PSQL you can use a dedicated UUID type which helps the db and app know what is being stored underneath and you _can_ sometimes get preformance benefits, in terms of storage & retrieval plus validation.
@@ -61,7 +59,7 @@ App still runs the exact same and you can query an event by Id and have its resu
 ---
 ## Development Notes
 
-* Ensure Redis is running if you plan to use it (currently unused but its set it to easily use it).
+* Ensure Redis is running
 * Swagger and seeding only ran in development.
 * CORS is limited to local development hosts --> update your URLs accordingly in Program.cs .
 
@@ -85,6 +83,9 @@ builder.Services.AddCors(options =>
 ### Configuration
 
 This project uses both `appsettings.json` for production and `appsettings.Development.json` for local development.
+
+#### App Configuration is handled using a PoCo inside of the Infrastructure folder
+- if you need to add to add any other connection strings or env vars you will need to update this class so they are injected into the application!
 
 To configure the application:
 
