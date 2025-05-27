@@ -29,10 +29,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<AppSettings>(
     builder.Configuration.GetSection("ConnectionStrings"));
 
-// <summary>
-// Uncomment the block below to enable the caching layer
-// </summary>
-
 //Caching Layer - This provides an agnostic caching interface for the application with support for L1/L1+L2
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
