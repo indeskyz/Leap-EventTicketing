@@ -147,6 +147,7 @@ sequenceDiagram
    - Azure Service Bus with sessions for ordered processing
    - Outbox table in SQL with idempotent consumers
    - Dead-letter queues for failed messages
+   
 
 2. **Concurrency Control**:
    - Optimistic concurrency for ticket reservations
@@ -197,4 +198,32 @@ sequenceDiagram
 - Pre-warm caches before major onsales
 - Implement virtual waiting rooms for high-demand events
 - Use Azure CDN for static assets
-- [Circuit breakers on payment processor integration](https://github.com/App-vNext/Polly)
+- Circuit breakers on payment processor integration
+
+**Scaling Strategies Cont'd**
+
+- There can be lots of different ways to scale and this is just making assumptions that you have unlimited network and monetary resources. May has well throw what Azure has to offer if youre gonna pay for it.
+
+- If you wanted something more cost effective, I would recommend multiple smaller instances of Data Storage and Caching and to not opt for any sharding. Just do replications with a proper backup strategy (every 30, 60, 90).
+
+## Docs Used
+
+- Outbox Pattern:
+https://microservices.io/patterns/data/transactional-outbox.html
+
+- Cache-Aside Pattern:
+https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside
+
+- Circuit Breaker Pattern (Polly):
+https://github.com/App-vNext/Polly
+https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker
+
+- Saga and Compensating Transaction Pattern:
+https://microservices.io/patterns/data/saga.html
+
+- Asynchronous Gateway / Aggregator Pattern (Saga-Oriented / Long-Running Transactions):
+https://docs.microsoft.com/en-us/azure/architecture/patterns/async-request-reply
+https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling
+
+- Optimistic Concurrency:
+https://learn.microsoft.com/en-us/ef/core/saving/concurrency
