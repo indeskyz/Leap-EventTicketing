@@ -31,7 +31,8 @@ namespace EventTicketing.Cache.Providers
 
         public Task ClearAsync()
         {
-            throw new NotImplementedException();
+            _cache.Dispose(); // MemoryCache does not support clear, so we dispose it to reset
+            return Task.CompletedTask;
         }
     }
 }
