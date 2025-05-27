@@ -81,10 +81,12 @@ To configure the application:
 2. Ensure your database is setup – **see [`DatabaseSetup.md`](./DatabaseSetup.md)**
 3. Create or modify `appsettings.Development.json` as needed:
 
+**NOTE THE DOUBLE SLASHES IF YOU ARE RUNNING INTO ISSUES CHECK YOUR CONN STRING**
+
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=YOUR_PATH/skillsAssessmentEvents.db",
+    "DefaultConnection": "Data Source=Data Source=D:\\Leap\\EventTicketing\\skillsAssessmentEvents.db",
     "Redis": "localhost:6379"
   },
   "Database": {
@@ -128,16 +130,18 @@ dotnet run
 * **NHibernate** for ORM access with fluent mappings
 * **AutoMapper** for DTO transformation
 * **Swagger UI** at `/swagger` (enabled in development)
-* **CORS** enabled for local development on `localhost:5173`
+* **CORS** enabled for local development
 * **Global error handling middleware**
-* **Redis** cache service registered
+* **Redis** cache service (unregistered but fully configured)
 
 
 ---
 
 ## Unit Tests
 
-Unit tests are located in the corresponding `Tests/` folder They validate:
+Unit tests are located in the corresponding `Tests/` folder Tests use **NUnit** and **Moq**.
+
+They validate:
 
 * EventService behavior
 * TicketSalesService behavior
@@ -146,13 +150,13 @@ Unit tests are located in the corresponding `Tests/` folder They validate:
 
 ## Architecture and Code Organization
 
-### Why Minimal APIs?
+### Why use .NET Minimal API?
 
 The application uses ASP.NET Core Minimal APIs to keep the codebase:
 
 - **Lightweight and fast to start:** Minimal APIs eliminate boilerplate controller code, reducing overhead and speeds up development.
 - **Clear routing:** Endpoint definitions are concise and colocated, making it easy to see which routes exist.
-- **Flexible:** allow for easy injection of dependencies and middleware + additional routes. 
+- **Flexible:** allow for easy injection of dependencies and middleware + additional features can be dropped right in with little to no overhead changes being required. 
 
 
 ### Code Organization
@@ -164,32 +168,13 @@ The project is architected in a layered, modular way to support maintainability 
 - **Repositories:** Data access is isolated behind repository interfaces, implemented with NHibernate to handle ORM and DB interaction.
 - **DTOs:** Data Transfer Objects are used for shaping API responses and requests, decoupling internal domain models from external contracts.
 - **Middleware:** Centralized cross-cutting concerns (error handling, logging) are implemented as middleware.
-- **Configuration:** The use of `appsettings.json` + environment overrides and dependency injection ensures configuration and dependencies are managed cleanly.
+- **Configuration:** The app uses a combination of `appsettings.json` + environment overrides to make application configuration extensible.
 
 ### Dependency Injection and Testing
 
-- All services and repositories are registered via DI container with scoped lifetimes.
+- [All services and repositories are registered via DI container with scoped lifetimes](https://learn.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-9.0#lifetime-and-registration-options).
 - NHibernate `ISessionFactory` and `ISession` are injected to provide unit-of-work per request.
 - AutoMapper profiles centralize mapping logic and are validated at startup.
-- This layered approach enables easy unit and integration testing by mocking dependencies.
+- Layered approach allows for ease when doing unit and integration testing by mocking dependencies.
 
 ---
-
-## Design Considerations
-
-### Extensibility
-
-To allow for future schema expansion or provider swapping (e.g., moving from SQLite to SQL Server):
-
-- **Services are interface-driven** (`IEventService`, `ITicketSalesService`)
-- **Repositories are layered abstractions** over NHibernate (`IEventRepository`, etc.)
-- **DTOs** are used to shield consumers from internal schema changes.
-- **AutoMapper** ensures transformation logic is centralized and testable.
-- **Middleware** is used for global error handling.
-- **Configuration** is separated across `appsettings.json` and `appsettings.Development.json` for environment-specific behavior.
-
-### Performance
-
-- Queries for "Top 5 Events" are optimized for both count-based and revenue-based ranking.
-- Pagination and date filtering ensure efficient lookups.
-
