@@ -202,7 +202,7 @@ sequenceDiagram
 
 **Scaling Strategies Cont'd**
 
-- There can be lots of different ways to scale and this is just making assumptions that you have unlimited network and monetary resources. May has well throw what Azure has to offer if youre gonna pay for it.
+- There can be lots of different ways to scale and this is just making assumptions that you have unlimited network and monetary resources. May as well throw what Azure has to offer if youre gonna pay for it.
 
 - If you wanted something more cost effective, I would recommend multiple smaller instances of Data Storage and Caching and to not opt for any sharding. Just do replications with a proper backup strategy (every 30, 60, 90).
 
