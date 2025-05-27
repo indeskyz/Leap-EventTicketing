@@ -24,7 +24,6 @@ namespace EventTicketing.Tests.Events
         [Fact]
         public async Task GetUpcomingEventsAsync_ValidDays_ReturnsEvents()
         {
-            // Arrange
             var request = new PaginationRequest { PageNumber = 1, PageSize = 10 };
             var testEvents = new List<Event> { new() { Id = "411eca5c-9be4-4a84-a2be-666167e71899", Name = "Test Event" } };
             var testDtos = new List<EventDto> { new EventDto { Id = "411eca5c-9be4-4a84-a2be-666167e71899", Name = "Test Event" } };
@@ -37,10 +36,8 @@ namespace EventTicketing.Tests.Events
                 .Setup(m => m.Map<IEnumerable<EventDto>>(testEvents))
                 .Returns(testDtos);
 
-            // Act
             var result = await _service.GetUpcomingEventsAsync(30, request);
 
-            // Assert
             Assert.NotNull(result);
             Assert.Single(result.Items);
             Assert.Equal(1, result.TotalCount);
@@ -53,10 +50,8 @@ namespace EventTicketing.Tests.Events
         [Fact]
         public async Task GetUpcomingEventsAsync_InvalidDays_ThrowsArgumentException()
         {
-            // Arrange
             var request = new PaginationRequest { PageNumber = 1, PageSize = 10 };
 
-            // Act & Assert
             var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
                 _service.GetUpcomingEventsAsync(0, request)); // 0 is invalid
             Assert.Equal("Days must be a positive number (Parameter 'days')", ex.Message);
