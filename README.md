@@ -1,6 +1,6 @@
 # Event Ticketing System – Server API
 
-An ASP.NET Core Web API (.NET 8) for browsing, querying, and analyzing event ticketing data. This backend powers the EventTicketing Client and exposes endpoints for upcoming events, ticket sales, and event performance analytics.
+Full Stack Developer Position - Leap Event Technology
 
 ---
 
