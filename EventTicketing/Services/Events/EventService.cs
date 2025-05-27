@@ -59,7 +59,6 @@ namespace EventTicketing.Services.Events
             {
                 var entity = await _repository.GetByIdAsync(id);
 
-                // Add real business logic for handling cache misses
                 if (entity == null) {
                     throw new KeyNotFoundException($"Event with ID {id} not found.");
                 }
@@ -67,7 +66,7 @@ namespace EventTicketing.Services.Events
             }, new CacheOptions
             {
                 Expiration = TimeSpan.FromHours(2),
-                BypassLocalCache = false //This is just more for PoC - but this flag can be used to bypass local cache as the service is distributed to support both!
+                BypassLocalCache = false
             });
         }
     }
