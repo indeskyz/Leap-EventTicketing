@@ -10,7 +10,7 @@ There are 2 branches
 
 The cache-layer has some extra services, tests, and an endpoint to show you how I would setup a service that can connect and query any type of caching mechanism. Whether its HybridCache, SystemCache, Cloud resource using redis, local redis, etc.
 
-App still runs the exact same and you can query an event by Id and have its result saved in the redis cache!
+App still runs the exact same and you can query an event by Id and have its result saved in the redis cache(Endpoint is not exposed to the client its for PoC!!)
 
 ---
 
@@ -24,6 +24,7 @@ App still runs the exact same and you can query an event by Id and have its resu
 ├── Middleware/               # Error handling middleware
 ├── Services/                 # Business logic layer
 ├── Properties/
+├── Infrastructure/           # Used for Application Config and Loading in Env Vars
 ├── appsettings.json          # Production configuration
 ├── appsettings.Development.json # Development overrides
 ├── Program.cs                # Application startup and DI setup
@@ -37,7 +38,7 @@ App still runs the exact same and you can query an event by Id and have its resu
 
 - SQLite is used as the primary relational data store.
 
-- Redis has been configured but not yet implemented (caching layer planned). App was constructed with the thought of it being the base layer for the project inside of Caching.md
+- Redis layer is not configured nor implemented at this time.
 
 - All services should be extensible with interfaces and base classes to support future growth.
 
@@ -60,7 +61,6 @@ App still runs the exact same and you can query an event by Id and have its resu
 ---
 ## Development Notes
 
-* Ensure Redis is running if you plan to use it (currently unused but its set it to easily use it).
 * Swagger and seeding only ran in development.
 * CORS is limited to local development hosts --> update your URLs accordingly in Program.cs .
 
@@ -142,7 +142,6 @@ dotnet run
 * **Swagger UI** at `/swagger` (enabled in development)
 * **CORS** enabled for local development
 * **Global error handling middleware**
-* **Redis** cache service (unregistered but fully configured)
 
 
 ---
